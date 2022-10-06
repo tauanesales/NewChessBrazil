@@ -4,6 +4,7 @@ This is our main driver file. resposible for handling user input and displaying 
 
 import pyglet
 import ChessEngine
+from classes.MyWindow import MyWindow
 
 
 width = height = 512 #400 is another option
@@ -29,19 +30,9 @@ def loadImages():
 the main driver for our code. This will handle user inputs and updating the graphics
 """
 
-"""
-Responsible for all the graphics within a current state
-"""
-
-def drawGameState(window,gs):
-  drawBoard(window) #Draws the squares on the board 
-  
-  #add in highlighting or move suggestions (later)
-
-  #drawPieces(window,gs.board) #Draws the pieces on top of those squares
 
 
-def drawBoard(window):
+def createBoard():
   colors = [(255,255,255),(128,128,128)]
   board = []
   for i in range(dimension):
@@ -51,44 +42,47 @@ def drawBoard(window):
       rectangle = pyglet.shapes.Rectangle(x = square_size*i, y = square_size*j, width = square_size, height = square_size, color = color)
       board.append(rectangle)
       
-  @window.event
-  def on_draw():
-    window.clear()
-  
-    for rect in board:
-      rect.draw()
-    
+  return board
 
 
 
 """
 Draw the pieces on the board acording to the current GameState.board
 """
-def drawPieces(window, board):
+def createPieces(board):
   
   pieces = []
+ 
   for row in range(dimension):
-    for col in range(dimension):
-      piece = board[row][col]
 
+    for col in range(dimension):
+      
+
+      piece = board[row][col]
       if piece != "--":
-        piece_image = pyglet.sprite.Sprite(images[piece], x = row*square_size, y = col*square_size)
-        
+        piece_image = pyglet.sprite.Sprite(images[piece], x = col*square_size, y = (7-row)*square_size)
+          
         pieces.append(piece_image)
 
-  @window.event
-  def on_draw():
-    for piece in pieces:
-      piece.draw()
+   
+  return pieces
 
 
 def main():
-  window = pyglet.window.Window(width,height)
+  
   gs = ChessEngine.GameState()
   loadImages()
+  running = True
 
+  board = createBoard() #Draws the squares on the board 
+  
+  #add in highlighting or move suggestions (later)
 
-  drawGameState(window,gs)
+  pieces = createPieces(gs.board) #Draws the pieces on top of those squares
+
+  
+  window = MyWindow(width,height,board,pieces,running)
+
 
   pyglet.app.run()
 
