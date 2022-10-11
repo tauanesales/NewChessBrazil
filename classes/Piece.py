@@ -1,104 +1,112 @@
 from abc import ABC, abstractmethod
+from enum import Enum
 
-class Peca(ABC):
-  def __init__(self, image, id, x, y, width, height):
+class Color(Enum): # uso do enum para as cores
+  WHITE = 1
+  BLACK = 2
+
+class Piece(ABC):
+  def __init__(self, image, id, width, height, x, y):
     self.image = image
     self.id = id
-    self.x = x
-    self.y = y
     self.width = width
     self.height = height
-    self.status = 0
-
-  def contem_ponto(self, x, y):
-      return (self.x*self.width) <= x < (self.x+1)*self.width \
-          and (self.y*self.height) <= y < (self.y+1)*self.height
-
-  def mudanca_tabuleiro(self, board):
-    cores = [(255, 255, 255), (128, 128, 128)]
-    if self.status == 0:
-      self.status = 1
-      board[self.x * 8 + self.y].forma.color = (0, 0, 255)
+    if self.id[0] == "w":
+      self._color = Color.WHITE
     else:
-      self.status = 0
-      board[self.x * 8 + self.y].forma.color = cores[(self.x + self.y + 1) % 2]
+      self._color = Color.BLACK
+    self.x = x
+    self.y = y
 
-  def on_click(self, gamestate, board):
-    if gamestate.whiteToMove == True and self.id[0] == "w":
-      self.mudanca_tabuleiro(board)
-      return True
-    elif gamestate.whiteToMove == False and self.id[0] == "b":
-      self.mudanca_tabuleiro(board)
-      return True
-    else:
-      pass
-
-  def clica(self, x, y, gamestate, board):
-    if self.contem_ponto(x, y) and self.on_click(gamestate, board):
-      return True
-
+  @property
+  def color(self):
+    return self._color
 
   @abstractmethod
-  def mover(self, xf, yf, gamestate, board):
+  def move(self, new_square, old_square):
     pass
 
-  def capturar(self):
-    if board[self.x_final][self.x_final] != "--": # capturar
-      pass
-
-  def analise_check(self):
+  @abstractmethod
+  def moveList(self, board):
     pass
 
-class Torre(Peca):
-  def __init__(self, image, id, x, y, width, height):
-    super().__init__(image, id, x, y, width, height)
+  def capture(self, new_square): # método de captura, não precisa verificar a cor, já implantado no move
+    if self.move and new_square.piece != None:
+      return True
 
-  def mover(self, xf, yf, gamestate, board):
-    if self.status == 1:
-      print("Rook")
+  def isInRange(self, x, y): # caso a peça esteja dentro dos parâmetros, para não usar try para tratar erros
+    if 0 <= x <= 7 and 0 <= y <= 7:
+      return True
 
+class Rook(Piece):
+  def __init__(self, image, id, width, height, x, y):
+    super().__init__(image, id, width, height, x, y)
 
-class Cavalo(Peca):
-  def __init__(self, image, id, x, y, width, height):
-    super().__init__(image, id, x, y, width, height)
+  def move(self, new_square, old_square):
+    print("Rook")
 
-  def mover(self, xf, yf, gamestate, board):
-    if self.status == 1:
-      if (abs(xf-self.x) == 1 and abs(yf-self.y) == 2) or (abs(yf-self.y) == 1 and abs(xf-self.x) == 2):
-        if gamestate.board[7-yf][xf][0] != self.id[0]:
-          self.mudanca_tabuleiro(board)
-          self.x, self.y = xf, yf
-          self.image.x, self.image.y = self.x*self.width, self.y*self.height
-          return True
+  def moveList(self, board):
+    return []
 
-class Bispo(Peca):
-  def __init__(self, image, id, x, y, width, height):
-    super().__init__(image, id, x, y, width, height)
+class Knight(Piece):
+  def __init__(self, image, id, width, height, x, y):
+    super().__init__(image, id, width, height, x, y)
 
-  def mover(self, xf, yf, gamestate, board):
-    if self.status == 1:
-      print("Bishop")
+  def moveList(self, board): # lista de movimentos
+    moveList = []
+    possible_indexes = [1, -1, 2, -2] # lista para iteração
+    for i in possible_indexes:
+      for j in possible_indexes:
+        if abs(i) != abs(j): # cavalo move 2 casas verticais e 1 horizontal/2 horizontais e 1 vertical
+          xf = self.x + i
+          yf = self.y + j
+          if self.isInRange(xf, yf): # verificar se as coords finais estão dentro da matriz
+            if board[xf+yf*8].returnPieceColor() != self._color: # verificar se a peça é da mesma cor
+              moveList.append((xf, yf)) # append de uma tupla
+    return moveList
 
-class Rainha(Peca):
-  def __init__(self, image, id, x, y, width, height):
-    super().__init__(image, id, x, y, width, height)
+  def move(self, new_square, movelist): # verifica se na lista de movimentos é possível mover a peça à casa desejada
+    for i in movelist: # movelist = lista de tuplas, logo i = tupla
+      (x, y) = i
+      if (x, y) == (new_square.x, new_square.y):
+        return True
 
-  def mover(self, xf, yf, gamestate, board):
-    if self.status == 1:
-      print("Queen")
+class Bishop(Piece):
+  def __init__(self, image, id, width, height, x, y):
+    super().__init__(image, id, width, height, x, y)
 
-class Rei(Peca):
-  def __init__(self, image, id, x, y, width, height):
-    super().__init__(image, id, x, y, width, height)
+  def move(self, new_square, old_square):
+    print("Bishop")
 
-  def mover(self, xf, yf, gamestate, board):
-    if self.status == 1:
-      print("King")
+  def moveList(self, board):
+    return []
 
-class Peao(Peca):
-  def __init__(self, image, id, x, y, width, height):
-    super().__init__(image, id, x, y, width, height)
+class Queen(Piece):
+  def __init__(self, image, id, width, height, x, y):
+    super().__init__(image, id, width, height, x, y)
 
-  def mover(self, xf, yf, gamestate, board):
-    if self.status == 1:
-      print("Pawn")
+  def move(self, new_square, old_square):
+    print("Queen")
+
+  def moveList(self, board):
+    return []
+
+class King(Piece):
+  def __init__(self, image, id, width, height, x, y):
+    super().__init__(image, id, width, height, x, y)
+
+  def move(self, new_square, old_square):
+    print("King")
+
+  def moveList(self, board):
+    return []
+
+class Pawn(Piece):
+  def __init__(self, image, id, width, height, x, y):
+    super().__init__(image, id, width, height, x, y)
+
+  def move(self, new_square, old_square):
+    print("Pawn")
+
+  def moveList(self, board):
+    return []

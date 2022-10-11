@@ -6,17 +6,20 @@ import pyglet
 import ChessEngine
 from classes.MyWindow import MyWindow
 from classes.Piece import *
-from classes.Board import Casa
+from classes.Board import Square
 
 width = height = 512 #400 is another option
 dimension = 8 #8x8 chess board
 square_size = height // dimension
 max_fps = 15 #for animations
 images = {}
+batch = pyglet.graphics.Batch()
+sprites = []
 
 """
 Initialize a global dictionary of images
 """
+
 
 def loadImages():
   pieces = ["bR","bN","bB","bQ","bK","bB","bN","bR","bp","wp","wR","wN","wB","wQ","wK","wB","wN","wR"]
@@ -34,12 +37,14 @@ the main driver for our code. This will handle user inputs and updating the grap
 def createBoard():
   colors = [(255,255,255),(128,128,128)]
   board = []
-  for i in range(dimension):
-    for j in range(dimension):
+  for j in range(dimension):
+    for i in range(dimension):
       color = colors[(i+(7-j)) % 2]
-      rectangle = pyglet.shapes.Rectangle(x = square_size*i, y = square_size*j, width = square_size, height = square_size, color = color)
-      casa = Casa(rectangle, i, j, square_size, square_size)
-      board.append(casa)
+      rectangle = pyglet.shapes.Rectangle(x = square_size*i, y = square_size*j, batch = batch,
+                                          width = square_size, height = square_size, color = color) # uso do batch, vários shapes
+      sprites.append(rectangle)
+      square = Square(rectangle, i, j, square_size, square_size) # instância da casa
+      board.append(square) # adicionar à lista/"matriz"
   return board
 
 
@@ -47,49 +52,43 @@ def createBoard():
 """
 Draw the pieces on the board acording to the current GameState.board
 """
-def createPieces(board):
-  
-  pieces = []
+def createPieces(initial_board, object_board):
 
   for row in range(dimension):
 
     for col in range(dimension):
-      
 
-      piece = board[row][col]
+      piece = initial_board[7-row][col] # coordenada da matriz inicial do gamestate, conversão para o pyglet
       if piece != "--":
-        piece_image = pyglet.sprite.Sprite(images[piece], x=col * square_size, y= (7 - row) * square_size)
-        args = (piece_image, piece, col, 7 - row, square_size, square_size)
+        piece_image = pyglet.sprite.Sprite(images[piece], x=col * square_size, y= (row * square_size)) # sprite da imagem
+        args = (piece_image, piece, square_size, square_size, col, row) # construtor da classe das peças
+        piece_instance = "" # instância da peça
         if piece[1] == "R":
-          peca = Torre(*args)
+          piece_instance = Rook(*args)
         elif piece[1] == "N":
-          peca = Cavalo(*args)
+          piece_instance = Knight(*args)
         elif piece[1] == "B":
-          peca = Bispo(*args)
+          piece_instance = Bishop(*args)
         elif piece[1] == "Q":
-          peca = Rainha(*args)
+          piece_instance = Queen(*args)
         elif piece[1] == "K":
-          peca = Rei(*args)
+          piece_instance = King(*args)
         elif piece[1] == "p":
-          peca = Peao(*args)
-        pieces.append(peca)
-
-   
-  return pieces
+          piece_instance = Pawn(*args)
+        object_board[8*row + col].piece = piece_instance # vincular a peça à casa (lista linear)
+  return object_board
 
 def main():
   
   gs = ChessEngine.GameState()
+
   loadImages()
+
   running = True
 
-  board = createBoard() #Draws the squares on the board 
-  
-  #add in highlighting or move suggestions (later)
+  board = createPieces(gs.board, createBoard()) #Draws the squares on the board
 
-  pieces = createPieces(gs.board) #Draws the pieces on top of those squares
-
-  window = MyWindow(width,height,board,pieces,running, gs)
+  window = MyWindow(width, height, board, running, gs, batch)
 
   pyglet.app.run()
 

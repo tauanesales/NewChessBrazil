@@ -18,11 +18,11 @@ class GameState():
       ["wR","wN","wB","wQ","wK","wB","wN","wR"],
 
     ]
-    self.whiteToMove = True
-    self.clicado = 0
+    self.whiteToMove = True # turno das brancas
+    self.clicked = 0 # verifica a peça que foi clicada
     self.moveLog = []
 
-  def mudarTurno(self):
+  def shiftChange(self): # mudança de turno
     if self.whiteToMove == True:
       self.whiteToMove = False
     else:
