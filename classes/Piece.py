@@ -54,15 +54,12 @@ class Knight(Piece):
 
   def moveList(self, board): # lista de movimentos
     moveList = []
-    possible_indexes = [1, -1, 2, -2] # lista para iteração
-    for i in possible_indexes:
-      for j in possible_indexes:
-        if abs(i) != abs(j): # cavalo move 2 casas verticais e 1 horizontal/2 horizontais e 1 vertical
-          xf = self.x + i
-          yf = self.y + j
-          if self.isInRange(xf, yf): # verificar se as coords finais estão dentro da matriz
-            if board[xf+yf*8].returnPieceColor() != self._color: # verificar se a peça é da mesma cor
-              moveList.append((xf, yf)) # append de uma tupla
+    possible_moves = [(-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1)] # melhorar o entendimento
+    for move in possible_moves:
+      (xf, yf) = (self.x + move[0], self.y + move[1])
+      if self.isInRange(xf, yf): # verificar se as coords finais estão dentro da matriz
+        if board[xf+yf*8].returnPieceColor() != self._color: # verificar se a peça é da mesma cor
+          moveList.append((xf, yf)) # append de uma tupla
     return moveList
 
   def move(self, new_square, movelist): # verifica se na lista de movimentos é possível mover a peça à casa desejada
