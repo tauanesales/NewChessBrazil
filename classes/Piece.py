@@ -64,7 +64,7 @@ class Rook(Piece):
 class Knight(Piece):
   def __init__(self, image, id, width, height, x, y):
     super().__init__(image, id, width, height, x, y)
-
+    
   def moveList(self, board): # lista de movimentos
     moveList = []
     possible_indexes = [1, -1, 2, -2] # lista para iteração
@@ -117,6 +117,7 @@ class King(Piece):
 class Pawn(Piece): 
   def __init__(self, image, id, width, height, x, y):
     super().__init__(image, id, width, height, x, y)
+    self.already_moved = False
 
   def move(self, new_square, moveList):
     
