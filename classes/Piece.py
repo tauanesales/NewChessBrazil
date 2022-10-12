@@ -42,11 +42,24 @@ class Rook(Piece):
   def __init__(self, image, id, width, height, x, y):
     super().__init__(image, id, width, height, x, y)
 
-  def move(self, new_square, old_square):
-    print("Rook")
+  def move(self, new_square, movelist): # verifica se na lista de movimentos é possível mover a peça à casa desejada
+    for i in movelist: # movelist = lista de tuplas, logo i = tupla
+      (x, y) = i
+      if (x, y) == (new_square.x, new_square.y):
+        return True
 
   def moveList(self, board):
-    return []
+    moveList = []
+    possible_indexes = [(0,1),(0,2),(0,3),(0,4),(0,5),(0,6),(0,7),(0,8),(1,0), 
+    (2,0),(3,0),(4,0),(5,0),(6,0), (7,0),(8,0)]
+    for i in possible_indexes:
+      xf = self.x + i[0]
+      yf = self.y + i[1]
+      if self.isInRange(xf, yf): # verificar se as coords finais estão dentro da matriz
+        if board[xf+yf*8].returnPieceColor() != self._color: # verificar se a peça é da mesma cor
+          moveList.append((xf, yf)) # append de uma tupla
+    return moveList
+
 
 class Knight(Piece):
   def __init__(self, image, id, width, height, x, y):
@@ -101,12 +114,38 @@ class King(Piece):
   def moveList(self, board):
     return []
 
-class Pawn(Piece):
+class Pawn(Piece): 
   def __init__(self, image, id, width, height, x, y):
     super().__init__(image, id, width, height, x, y)
 
-  def move(self, new_square, old_square):
-    print("Pawn")
+  def move(self, new_square, moveList):
+    
+    ans = True
+    for i in moveList:
+        
+        if i == (new_square.x,new_square.y):
+
+            
+            if  i == (self.x,self.y - 2) and self.already_moved:
+                self.already_moved = True
+                ans = False
+             
+            if i == (self.x,self.y + 2) and self.already_moved:
+                self.already_moved = True
+                ans = False
+            return ans
+        
 
   def moveList(self, board):
-    return []
+      moveList = []
+      possible_moves = [(0, 1), (0, 2),(0,-1),(0,-2)]
+
+      for move in possible_moves:
+          xf = self.x + move[0]
+          yf = self.y + move[1] 
+
+          if self.isInRange(xf, yf):
+              # verificar se a peça é da mesma cor
+              if board[xf+yf*8].returnPieceColor() != self._color:
+                  moveList.append((xf, yf)) # append de uma tupla
+      return moveList
