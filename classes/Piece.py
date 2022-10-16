@@ -159,7 +159,6 @@ class Pawn(Piece):
     def verify_if_black_pawn_can_go_2_squares(self, move):
       
       if move == (self.x, self.y - 2) and self.already_moved:
-        self.already_moved = True
         return False
 
       else:
@@ -168,7 +167,6 @@ class Pawn(Piece):
     def verify_if_white_pawn_can_go_2_squares(self, move):
       
       if move == (self.x, self.y + 2) and self.already_moved:
-        self.already_moved = True
         return False
 
       else:
@@ -183,18 +181,22 @@ class Pawn(Piece):
 
                 if not(self.verify_if_black_pawn_can_go_2_squares(move)):
                   ans = False
-
-                if not(self.verify_if_white_pawn_can_go_2_squares(move)):
-                  ans = False
                 
+                elif not(self.verify_if_white_pawn_can_go_2_squares(move)):
+                  ans = False
+                else:
+                    self.already_moved = True
                 return ans
 
 
     def moveList(self, board):
       moveList = []
-      print(self._color)
+      
       if self._color == Color.WHITE:
-        possible_moves = [(0, 1), (0, 2)]
+        if self.already_moved:
+            possible_moves = [(0, 1)]
+        else:
+            possible_moves = [(0,1),(0, 2)]
 
         for move in possible_moves:
               xf = self.x + move[0]
@@ -206,7 +208,10 @@ class Pawn(Piece):
                       moveList.append((xf, yf))  # append de uma tupla
         
       else:
-        possible_moves = [(0, -1), (0, -2)]
+        if self.already_moved:
+            possible_moves = [(0, -1)]
+        else:
+            possible_moves = [(0, -1), (0, -2)]
 
         for move in possible_moves:
             xf = self.x + move[0]
