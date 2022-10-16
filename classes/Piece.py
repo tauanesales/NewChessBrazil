@@ -102,6 +102,7 @@ class Knight(Piece):
     def __init__(self, image, id, width, height, x, y):
         super().__init__(image, id, width, height, x, y)
 
+<<<<<<< HEAD
     def moveList(self, board):  # lista de movimentos
         moveList = []
         possible_indexes = [1, -1, 2, -2]  # lista para iteração
@@ -121,6 +122,17 @@ class Knight(Piece):
             #   (x, y) = i
             if i == (new_square.x, new_square.y):
                 return True
+=======
+  def moveList(self, board): # lista de movimentos
+    moveList = []
+    possible_moves = [(-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1)] # melhorar o entendimento
+    for move in possible_moves:
+      (xf, yf) = (self.x + move[0], self.y + move[1])
+      if self.isInRange(xf, yf): # verificar se as coords finais estão dentro da matriz
+        if board[xf+yf*8].returnPieceColor() != self._color: # verificar se a peça é da mesma cor
+          moveList.append((xf, yf)) # append de uma tupla
+    return moveList
+>>>>>>> 79beea113d86ba652c12178c62566fe510837e9d
 
 
 class Bishop(Piece):
@@ -217,6 +229,7 @@ class Pawn(Piece):
 
     def verify_if_black_pawn_can_go_2_squares(self, move):
 
+<<<<<<< HEAD
         if move == (self.x, self.y - 2) and self.already_moved:
             return False
 
@@ -281,3 +294,7 @@ class Pawn(Piece):
                         moveList.append((xf, yf))  # append de uma tupla
 
         return moveList
+=======
+  def moveList(self, board):
+    return []
+>>>>>>> 79beea113d86ba652c12178c62566fe510837e9d
