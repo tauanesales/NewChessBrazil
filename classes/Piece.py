@@ -70,9 +70,12 @@ class Rook(Piece):
     for i in possible_indexes:
       xf = self.x + i[0]
       yf = self.y + i[1]
+      
+      
       if self.isInRange(xf, yf): # verificar se as coords finais estão dentro da matriz
         if board[xf+yf*8].returnPieceColor() != self._color: # verificar se a peça é da mesma cor
           moveList.append((xf, yf)) # append de uma tupla
+
     return moveList
 
 class Knight(Piece):
