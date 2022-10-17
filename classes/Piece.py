@@ -1,18 +1,16 @@
 from abc import ABC, abstractmethod
 from enum import Enum
 
-
-class Color(Enum):  # uso do enum para as cores
+class Color(Enum): # uso do enum para as cores
     WHITE = 1
     BLACK = 2
 
-
 class Piece(ABC):
     def __init__(self, image, id, width, height, x, y):
-        self.image = image
-        self.id = id
-        self.width = width
-        self.height = height
+        self.image = image # desenho da peça
+        self.id = id # id da peça
+        self.width = width # largura da peça
+        self.height = height # altura da peça
         if self.id[0] == "w":
             self._color = Color.WHITE
         else:
@@ -94,7 +92,6 @@ class Rook(Piece):
             else:
                 directions += 1
 
-
         return movelist
 
 
@@ -102,7 +99,6 @@ class Knight(Piece):
     def __init__(self, image, id, width, height, x, y):
         super().__init__(image, id, width, height, x, y)
 
-<<<<<<< HEAD
     def moveList(self, board):  # lista de movimentos
         moveList = []
         possible_indexes = [1, -1, 2, -2]  # lista para iteração
@@ -122,17 +118,6 @@ class Knight(Piece):
             #   (x, y) = i
             if i == (new_square.x, new_square.y):
                 return True
-=======
-  def moveList(self, board): # lista de movimentos
-    moveList = []
-    possible_moves = [(-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1)] # melhorar o entendimento
-    for move in possible_moves:
-      (xf, yf) = (self.x + move[0], self.y + move[1])
-      if self.isInRange(xf, yf): # verificar se as coords finais estão dentro da matriz
-        if board[xf+yf*8].returnPieceColor() != self._color: # verificar se a peça é da mesma cor
-          moveList.append((xf, yf)) # append de uma tupla
-    return moveList
->>>>>>> 79beea113d86ba652c12178c62566fe510837e9d
 
 
 class Bishop(Piece):
@@ -222,43 +207,20 @@ class King(Piece):
             if (x, y) == (new_square.x, new_square.y):
                 return True
 
+
 class Pawn(Piece):
     def __init__(self, image, id, width, height, x, y):
         super().__init__(image, id, width, height, x, y)
         self.already_moved = False
 
-    def verify_if_black_pawn_can_go_2_squares(self, move):
-
-<<<<<<< HEAD
-        if move == (self.x, self.y - 2) and self.already_moved:
-            return False
-
-        else:
-            return True
-
-    def verify_if_white_pawn_can_go_2_squares(self, move):
-
-        if move == (self.x, self.y + 2) and self.already_moved:
-            return False
-
-        else:
-            return True
-
     def move(self, new_square, moveList):
 
-        ans = True
         for move in moveList:
 
             if move == (new_square.x, new_square.y):
-
-                if not (self.verify_if_black_pawn_can_go_2_squares(move)):
-                    ans = False
-
-                elif not (self.verify_if_white_pawn_can_go_2_squares(move)):
-                    ans = False
-                else:
+                if self.already_moved == False:
                     self.already_moved = True
-                return ans
+                return True
 
     def moveList(self, board):
         moveList = []
@@ -273,11 +235,14 @@ class Pawn(Piece):
                 xf = self.x + move[0]
                 yf = self.y + move[1]
 
-                if self.isInRange(xf, yf):
-                    # verificar se a peça é da mesma cor
-                    if board[xf + yf * 8].returnPieceColor() != self._color:
-                        moveList.append((xf, yf))  # append de uma tupla
-
+                if self.there_is_piece_between(xf, yf, board) == -1:
+                    pass
+                elif self.there_is_piece_between(xf, yf, board) == 0:
+                    moveList.append((xf, yf))
+                elif self.there_is_piece_between(xf, yf, board) == 1:
+                    pass
+                else:
+                    pass
         else:
             if self.already_moved:
                 possible_moves = [(0, -1)]
@@ -288,13 +253,12 @@ class Pawn(Piece):
                 xf = self.x + move[0]
                 yf = self.y + move[1]
 
-                if self.isInRange(xf, yf):
-                    # verificar se a peça é da mesma cor
-                    if board[xf + yf * 8].returnPieceColor() != self._color:
-                        moveList.append((xf, yf))  # append de uma tupla
-
+                if self.there_is_piece_between(xf, yf, board) == -1:
+                    pass
+                elif self.there_is_piece_between(xf, yf, board) == 0:
+                    moveList.append((xf, yf))
+                elif self.there_is_piece_between(xf, yf, board) == 1:
+                    pass
+                else:
+                    pass
         return moveList
-=======
-  def moveList(self, board):
-    return []
->>>>>>> 79beea113d86ba652c12178c62566fe510837e9d
