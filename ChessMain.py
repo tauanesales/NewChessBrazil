@@ -8,27 +8,19 @@ from classes.MyWindow import MyWindow
 from classes.Piece import *
 from classes.Board import Square
 
-width = height = 512 #400 is another option
-dimension = 8 #8x8 chess board
-square_size = height // dimension
-max_fps = 15 #for animations
-images = {}
-batch = pyglet.graphics.Batch()
-sprites = []
-
-"""
-Initialize a global dictionary of images
-"""
-
+width = height = 512 # tamanho do tabuleiro
+dimension = 8 # tabuleiro 8x8
+square_size = height // dimension # tamanho do quadrado
+max_fps = 15
+images = {} # dict de sprites das peças
+batch = pyglet.graphics.Batch() # batch para renderizar com mais eficiência
+sprites = [] # lista dos shapes da casa para renderização (batch)
 
 def loadImages():
   pieces = ["bR","bN","bB","bQ","bK","bB","bN","bR","bp","wp","wR","wN","wB","wQ","wK","wB","wN","wR"]
 
   for piece in pieces:
     images[piece] = pyglet.image.load("public/" + piece + ".png")
-  
-  # We can access an image by saying images[wp]
-
 
 """
 the main driver for our code. This will handle user inputs and updating the graphics
