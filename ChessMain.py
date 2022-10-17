@@ -1,7 +1,3 @@
-"""
-This is our main driver file. resposible for handling user input and displaying the current GameState
-"""
-
 import pyglet
 import ChessEngine
 from classes.MyWindow import MyWindow
@@ -23,15 +19,15 @@ def loadImages():
     images[piece] = pyglet.image.load("public/" + piece + ".png")
 
 """
-the main driver for our code. This will handle user inputs and updating the graphics
+Código principal, criação do tabuleiro, peças e estados de jogo
 """
 
-def createBoard():
-  colors = [(255,255,255),(128,128,128)]
+def createBoard(): # criação do tabuleiro
+  colors = [(255,255,255),(128,128,128)] # cor branca e cinza, alternância
   board = []
   for j in range(dimension):
     for i in range(dimension):
-      color = colors[(i+(7-j)) % 2]
+      color = colors[(i+(7-j)) % 2] # escolha da cor baseado na soma de linhas e colunas
       rectangle = pyglet.shapes.Rectangle(x = square_size*i, y = square_size*j, batch = batch,
                                           width = square_size, height = square_size, color = color) # uso do batch, vários shapes
       sprites.append(rectangle)
@@ -39,12 +35,7 @@ def createBoard():
       board.append(square) # adicionar à lista/"matriz"
   return board
 
-
-
-"""
-Draw the pieces on the board acording to the current GameState.board
-"""
-def createPieces(initial_board, object_board):
+def createPieces(initial_board, object_board): # inserção das peças, contidas na casa
 
   for row in range(dimension):
 
@@ -72,15 +63,15 @@ def createPieces(initial_board, object_board):
 
 def main():
   
-  gs = ChessEngine.GameState()
+  gs = ChessEngine.GameState() # adicionando o gamestate ao jogo
 
-  loadImages()
+  loadImages() # carregar as imagens
 
-  running = True
+  running = True # "rodar" o jogo
 
-  board = createPieces(gs.board, createBoard()) #Draws the squares on the board
+  board = createPieces(gs.board, createBoard()) # tabuleiro criado com as casas e peças
 
-  window = MyWindow(width, height, board, running, gs, batch)
+  window = MyWindow(width, height, board, running, gs, batch) # criação da janela
 
   pyglet.app.run()
 
