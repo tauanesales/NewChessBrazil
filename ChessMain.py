@@ -25,26 +25,27 @@ Código principal, criação do tabuleiro, peças e estados de jogo
 def createBoard(): # criação do tabuleiro
   colors = [(255,255,255),(128,128,128)] # cor branca e cinza, alternância
   board = []
-  for j in range(dimension):
-    for i in range(dimension):
-      color = colors[(i+(7-j)) % 2] # escolha da cor baseado na soma de linhas e colunas
-      rectangle = pyglet.shapes.Rectangle(x = square_size*i, y = square_size*j, batch = batch,
+  for i in range(dimension):
+    line = []
+    for j in range(dimension):
+      color = colors[(i+j+1) % 2] # escolha da cor baseado na soma de linhas e colunas
+      rectangle = pyglet.shapes.Rectangle(x = square_size*j, y = square_size*i, batch = batch,
                                           width = square_size, height = square_size, color = color) # uso do batch, vários shapes
       sprites.append(rectangle)
       square = Square(rectangle, i, j, square_size, square_size) # instância da casa
-      board.append(square) # adicionar à lista/"matriz"
+      line.append(square) # adicionar à lista/"matriz"
+    board.append(line)
   return board
 
 def createPieces(initial_board, object_board): # inserção das peças, contidas na casa
 
   for row in range(dimension):
-
     for col in range(dimension):
 
-      piece = initial_board[7-row][col] # coordenada da matriz inicial do gamestate, conversão para o pyglet
+      piece = initial_board[row][col] # coordenada da matriz inicial do gamestate, conversão para o pyglet
       if piece != "--":
         piece_image = pyglet.sprite.Sprite(images[piece], x=col * square_size, y= (row * square_size)) # sprite da imagem
-        args = (piece_image, piece, square_size, square_size, col, row) # construtor da classe das peças
+        args = (piece_image, piece, row, col) # construtor da classe das peças
         piece_instance = "" # instância da peça
         if piece[1] == "R":
           piece_instance = Rook(*args)
@@ -58,7 +59,7 @@ def createPieces(initial_board, object_board): # inserção das peças, contidas
           piece_instance = King(*args)
         elif piece[1] == "p":
           piece_instance = Pawn(*args)
-        object_board[8*row + col].piece = piece_instance # vincular a peça à casa (lista linear)
+        object_board[row][col].piece = piece_instance # vincular a peça à casa (lista linear)
   return object_board
 
 def main():
