@@ -2,79 +2,108 @@ import pyglet
 import ChessEngine
 from classes.MyWindow import MyWindow
 from classes.Piece import *
-from classes.Board import Square
+from classes.Square import Square
+from random import choice
 
-width = height = 512 # tamanho do tabuleiro
-dimension = 8 # tabuleiro 8x8
-square_size = height // dimension # tamanho do quadrado
+width = height = 512  # tamanho do tabuleiro
+dimension = 8  # tabuleiro 8x8
+square_size = height // dimension  # tamanho do quadrado
 max_fps = 15
-images = {} # dict de sprites das peças
-batch = pyglet.graphics.Batch() # batch para renderizar com mais eficiência
-sprites = [] # lista dos shapes da casa para renderização (batch)
+images = {}  # dict de sprites das peças
+batch = pyglet.graphics.Batch()  # batch para renderizar com mais eficiência
+sprites = []  # lista dos shapes da casa para renderização (batch)
+board_rotation = choice([False, True])
+
+if board_rotation == False:
+    a = 1
+    b = 0
+else:
+    a = -1
+    b = dimension - 1
+
 
 def loadImages():
-  pieces = ["bR","bN","bB","bQ","bK","bB","bN","bR","bp","wp","wR","wN","wB","wQ","wK","wB","wN","wR"]
+    pieces = ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR", "bp",
+              "wp", "wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]
 
-  for piece in pieces:
-    images[piece] = pyglet.image.load("public/" + piece + ".png")
+    for piece in pieces:
+        images[piece] = pyglet.image.load("public/" + piece + ".png")
+
 
 """
 Código principal, criação do tabuleiro, peças e estados de jogo
 """
 
-def createBoard(): # criação do tabuleiro
-  colors = [(255,255,255),(128,128,128)] # cor branca e cinza, alternância
-  board = []
-  for i in range(dimension):
-    line = []
-    for j in range(dimension):
-      color = colors[(i+j+1) % 2] # escolha da cor baseado na soma de linhas e colunas
-      rectangle = pyglet.shapes.Rectangle(x = square_size*j, y = square_size*i, batch = batch,
-                                          width = square_size, height = square_size, color = color) # uso do batch, vários shapes
-      sprites.append(rectangle)
-      square = Square(rectangle, i, j, square_size, square_size) # instância da casa
-      line.append(square) # adicionar à lista/"matriz"
-    board.append(line)
-  return board
 
-def createPieces(initial_board, object_board): # inserção das peças, contidas na casa
+def createBoard():  # criação do tabuleiro
+    colors = [(255, 255, 255), (128, 128, 128)]  # cor branca e cinza, alternância
+    board = []
+    for i in range(dimension):
+        line = []
+        row = a * i + b
+        for j in range(dimension):
+            color = colors[(i + j + 1) % 2]  # escolha da cor baseado na soma de linhas e colunas
+            rectangle = pyglet.shapes.Rectangle(x=square_size * j, y=square_size * row, batch=batch,
+                                                width=square_size, height=square_size,
+                                                color=color)  # uso do batch, vários shapes
+            sprites.append(rectangle)
+            square = Square(rectangle, row, j, square_size, square_size)  # instância da casa
+            line.append(square)  # adicionar à matriz
 
-  for row in range(dimension):
-    for col in range(dimension):
+        board.append(line)
 
-      piece = initial_board[row][col] # coordenada da matriz inicial do gamestate, conversão para o pyglet
-      if piece != "--":
-        piece_image = pyglet.sprite.Sprite(images[piece], x=col * square_size, y= (row * square_size)) # sprite da imagem
-        args = (piece_image, piece, row, col) # construtor da classe das peças
-        piece_instance = "" # instância da peça
-        if piece[1] == "R":
-          piece_instance = Rook(*args)
-        elif piece[1] == "N":
-          piece_instance = Knight(*args)
-        elif piece[1] == "B":
-          piece_instance = Bishop(*args)
-        elif piece[1] == "Q":
-          piece_instance = Queen(*args)
-        elif piece[1] == "K":
-          piece_instance = King(*args)
-        elif piece[1] == "p":
-          piece_instance = Pawn(*args)
-        object_board[row][col].piece = piece_instance # vincular a peça à casa (lista linear)
-  return object_board
+    return board
+
+
+def createPieces(initial_board, object_board):  # inserção das peças, contidas na casa
+    for row in range(dimension):
+        i = a * row + b
+        for col in range(dimension):
+            piece = initial_board[row][col]  # coordenada da matriz inicial do gamestate
+
+            if piece != "--":
+                piece_image = pyglet.sprite.Sprite(images[piece], x=col * square_size,
+                                                   y=i * square_size)  # sprite da imagem
+                args = (piece_image, piece, i, col)  # construtor da classe das peças
+                piece_instance = ""  # instância da peça
+
+                if piece[1] == "R":
+                    piece_instance = Rook(*args)
+                elif piece[1] == "N":
+                    piece_instance = Knight(*args)
+                elif piece[1] == "B":
+                    piece_instance = Bishop(*args)
+                elif piece[1] == "Q":
+                    piece_instance = Queen(*args)
+                elif piece[1] == "K":
+                    piece_instance = King(*args)
+                elif piece[1] == "p":
+                    piece_instance = Pawn(*args)
+
+                object_board[row][col].piece = piece_instance  # vincular a peça à casa
+
+    return object_board
+
 
 def main():
-  
-  gs = ChessEngine.GameState() # adicionando o gamestate ao jogo
+    gs = ChessEngine.GameState()  # adicionando o gamestate ao jogo
 
-  loadImages() # carregar as imagens
+    gs.rotation = board_rotation
 
-  running = True # "rodar" o jogo
+    loadImages()  # carregar as imagens
 
-  board = createPieces(gs.board, createBoard()) # tabuleiro criado com as casas e peças
+    running = True  # "rodar" o jogo
 
-  window = MyWindow(width, height, board, running, gs, batch) # criação da janela
+    board = createPieces(gs.board, createBoard())  # tabuleiro criado com as casas e peças
 
-  pyglet.app.run()
+    if gs.rotation == True:
+
+        board.reverse()
+
+    window = MyWindow(width, height, board, running, gs, batch)  # criação da janela
+
+    pyglet.app.run()
+
 
 if __name__ == "__main__":
-  main()
+    main()

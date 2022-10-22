@@ -1,9 +1,6 @@
 from abc import ABC, abstractmethod
-from enum import Enum
+from classes.Colors import Color
 
-class Color(Enum): # uso do enum para as cores
-    WHITE = 1
-    BLACK = 2
 
 class Piece(ABC):
     def __init__(self, image, id, i, j):
@@ -25,7 +22,7 @@ class Piece(ABC):
         pass
 
     @abstractmethod
-    def moveList(self, board):
+    def moveList(self, board, rotation):
         pass
 
     def there_is_piece_between(self, i, j, board): #
@@ -40,8 +37,7 @@ class Piece(ABC):
             return -1
 
     # método de captura, não precisa verificar a cor, já implantado no move
-    def capture(self, new_square):
-
+    def canCapture(self, new_square):
         if self.move and new_square.piece != None:
             return True
 
@@ -60,7 +56,7 @@ class Rook(Piece):
             if (i, j) == (new_square.i, new_square.j):
                 return True
 
-    def moveList(self, board):
+    def moveList(self, board, rotation):
         movelist = []
         possible_move = [1, 1, 1, 1]  # [norte, leste, sul, oeste]
         directions = 0
@@ -96,7 +92,7 @@ class Knight(Piece):
     def __init__(self, image, id, i, j):
         super().__init__(image, id, i, j)
 
-    def moveList(self, board):  # lista de movimentos
+    def moveList(self, board, rotation):  # lista de movimentos
         moveList = []
         possible_indexes = [1, -1, 2, -2]  # lista para iteração
         for i in possible_indexes:
@@ -104,15 +100,13 @@ class Knight(Piece):
                 if abs(i) != abs(j):  # cavalo move 2 casas verticais e 1 horizontal/2 horizontais e 1 vertical
                     i_final = self.i + i
                     j_final = self.j + j
-                    if self.isInRange(i_final, j_final):  # verificar se as coords finais estão dentro da matriz
-                        if board[i_final][j_final].returnPieceColor() != self._color:  # verificar se a peça é da mesma cor
-                            moveList.append((i_final, j_final))  # append de uma tupla
+                    if self.there_is_piece_between(i_final, j_final, board) in (0, 1):  # verificar se as coords finais estão dentro da matriz
+                        moveList.append((i_final, j_final))  # append de uma tupla
         return moveList
 
     # verifica se na lista de movimentos é possível mover a peça à casa desejada
     def move(self, new_square, movelist):
         for i in movelist:  # movelist = lista de tuplas, logo i = tupla
-            #   (i, j) = i
             if i == (new_square.i, new_square.j):
                 return True
 
@@ -127,7 +121,7 @@ class Bishop(Piece):
             if (i, j) == (new_square.i, new_square.j):
                 return True
 
-    def moveList(self, board):
+    def moveList(self, board, rotation):
         movelist = []
         possible_move = [1, 1, 1, 1]  # [1º quadrante, 2º quad, 3º quad, 4º quad]
         directions = 0
@@ -175,25 +169,26 @@ class Queen(Piece):
             if (i, j) == (new_square.i, new_square.j):
                 return True
 
-    def moveList(self, board):
+    def moveList(self, board, rotation):
         movelist = []
-        movelist += Rook.moveList(self, board)
-        movelist += Bishop.moveList(self, board)
+        movelist += Rook.moveList(self, board, rotation)
+        movelist += Bishop.moveList(self, board, rotation)
         return movelist
 
 class King(Piece):
     def __init__(self, image, id, i, j):
         super().__init__(image, id, i, j)
 
-    def moveList(self, board):
+    def moveList(self, board, rotation):
         kingMoves = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
         movelist = []
         for i in range(8):
             i_final = self.i + kingMoves[i][0]
             j_final = self.j + kingMoves[i][1]
+
             if self.there_is_piece_between(i_final, j_final, board) == -1:
                 pass
-            if self.there_is_piece_between(i_final, j_final, board) == 0:  # não é uma peça aliada (pode ser peça vazia ou inimiga)
+            elif self.there_is_piece_between(i_final, j_final, board) == 0:  # não é uma peça aliada (pode ser peça vazia ou inimiga)
                 movelist.append((i_final, j_final))
             elif self.there_is_piece_between(i_final, j_final, board) == 1:
                 movelist.append((i_final, j_final))
@@ -220,27 +215,15 @@ class Pawn(Piece):
                     self.already_moved = True
                 return True
 
-    def moveList(self, board):
+    def moveList(self, board, rotation):
         moveList = []
         direction = 0
+
         if self._color == Color.WHITE:
             if self.already_moved:
                 possible_moves = [(1, 0)]
             else:
                 possible_moves = [(1, 0), (2, 0)]
-
-            for move in possible_moves:
-                if direction == 0:
-                    i_final = self.i + move[0]
-                    j_final = self.j + move[1]
-                    if self.there_is_piece_between(i_final, j_final, board) == -1:
-                        pass
-                    elif self.there_is_piece_between(i_final, j_final, board) == 0:
-                        moveList.append((i_final, j_final))
-                    elif self.there_is_piece_between(i_final, j_final, board) == 1:
-                        direction = 1
-                    else:
-                        direction = 1
 
         else:
             if self.already_moved:
@@ -248,17 +231,21 @@ class Pawn(Piece):
             else:
                 possible_moves = [(-1, 0), (-2, 0)]
 
-            for move in possible_moves:
-                if direction == 0:
-                    i_final = self.i + move[0]
-                    j_final = self.j + move[1]
-                    if self.there_is_piece_between(i_final, j_final, board) == -1:
-                        pass
-                    elif self.there_is_piece_between(i_final, j_final, board) == 0:
-                        moveList.append((i_final, j_final))
-                    elif self.there_is_piece_between(i_final, j_final, board) == 1:
-                        direction = 1
-                    else:
-                        direction = 1
+        if rotation:
+            possible_moves = [(-1*i[0], 0) for i in possible_moves]
+
+        for move in possible_moves:
+            if direction == 0:
+                i_final = self.i + move[0]
+                j_final = self.j + move[1]
+                if self.there_is_piece_between(i_final, j_final, board) == -1:
+                    pass
+                elif self.there_is_piece_between(i_final, j_final, board) == 0:
+                    moveList.append((i_final, j_final))
+                elif self.there_is_piece_between(i_final, j_final, board) == 1:
+                    direction = 1
+                else:
+                    direction = 1
+
 
         return moveList
