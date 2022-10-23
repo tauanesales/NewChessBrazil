@@ -14,13 +14,6 @@ batch = pyglet.graphics.Batch()  # batch para renderizar com mais eficiência
 sprites = []  # lista dos shapes da casa para renderização (batch)
 board_rotation = choice([False, True])
 
-if board_rotation == False:
-    a = 1
-    b = 0
-else:
-    a = -1
-    b = dimension - 1
-
 
 def loadImages():
     pieces = ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR", "bp",
@@ -40,14 +33,13 @@ def createBoard():  # criação do tabuleiro
     board = []
     for i in range(dimension):
         line = []
-        row = a * i + b
         for j in range(dimension):
             color = colors[(i + j + 1) % 2]  # escolha da cor baseado na soma de linhas e colunas
-            rectangle = pyglet.shapes.Rectangle(x=square_size * j, y=square_size * row, batch=batch,
+            rectangle = pyglet.shapes.Rectangle(x=square_size * j, y=square_size * i, batch=batch,
                                                 width=square_size, height=square_size,
                                                 color=color)  # uso do batch, vários shapes
             sprites.append(rectangle)
-            square = Square(rectangle, row, j, square_size, square_size)  # instância da casa
+            square = Square(rectangle, i, j, square_size, square_size)  # instância da casa
             line.append(square)  # adicionar à matriz
 
         board.append(line)
@@ -57,14 +49,13 @@ def createBoard():  # criação do tabuleiro
 
 def createPieces(initial_board, object_board):  # inserção das peças, contidas na casa
     for row in range(dimension):
-        i = a * row + b
         for col in range(dimension):
             piece = initial_board[row][col]  # coordenada da matriz inicial do gamestate
 
             if piece != "--":
                 piece_image = pyglet.sprite.Sprite(images[piece], x=col * square_size,
-                                                   y=i * square_size)  # sprite da imagem
-                args = (piece_image, piece, i, col)  # construtor da classe das peças
+                                                   y=row * square_size)  # sprite da imagem
+                args = (piece_image, piece, row, col)  # construtor da classe das peças
                 piece_instance = ""  # instância da peça
 
                 if piece[1] == "R":
@@ -90,15 +81,15 @@ def main():
 
     gs.rotation = board_rotation
 
+    if gs.rotation == True:
+
+        gs.board.reverse()
+
     loadImages()  # carregar as imagens
 
     running = True  # "rodar" o jogo
 
     board = createPieces(gs.board, createBoard())  # tabuleiro criado com as casas e peças
-
-    if gs.rotation == True:
-
-        board.reverse()
 
     window = MyWindow(width, height, board, running, gs, batch)  # criação da janela
 
