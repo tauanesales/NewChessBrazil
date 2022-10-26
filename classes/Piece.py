@@ -40,7 +40,7 @@ class Piece(ABC):
             if board[i][j].piece == None:
                 return 0
 
-            elif board[i][j].returnPieceColor() != self._color:
+            elif board[i][j].returnPieceColor() != self.color:
                 return 1
 
             else:
@@ -263,7 +263,7 @@ class Pawn(Piece):
         moveList = []
         direction = 0
 
-        if self._color == Color.WHITE:
+        if self.color == Color.WHITE:
 
             capture_moves = [(1, 1), (1, -1)]
 
@@ -285,7 +285,7 @@ class Pawn(Piece):
 
         if rotation:
             possible_moves = [(-1*i[0], 0) for i in possible_moves]
-            capture_moves = [(i[0], -1*i[1]) for i in possible_moves]
+            capture_moves = [(-1*i[0], i[1]) for i in possible_moves]
 
         for move in possible_moves:
             if direction == 0:

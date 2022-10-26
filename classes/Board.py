@@ -49,11 +49,11 @@ class Board:
 
             self.board.append(line)
 
-    def addPiece(self, id, i, j):
+    def addPiece(self, piece, id, i, j):
         sprite = pyglet.sprite.Sprite(self.images[id], x = self.square_size*j,
                                     y = self.square_size*i)
 
-        return sprite, id, i, j
+        return piece(sprite, id, i, j)
 
     def createPieces(self):  # inserção das peças, contidas na casa
 
@@ -65,18 +65,18 @@ class Board:
         else:
             i = 0
 
-        rook_w1 = Rook(*self.addPiece("wR", i, 0))
-        rook_w2 = Rook(*self.addPiece("wR", i, 7))
+        rook_w1 = self.addPiece(Rook, "wR", i, 0)
+        rook_w2 = self.addPiece(Rook, "wR", i, 7)
 
-        knight_w1 = Knight(*self.addPiece("wN", i, 1))
-        knight_w2 = Knight(*self.addPiece("wN", i, 6))
+        knight_w1 = self.addPiece(Knight ,"wN", i, 1)
+        knight_w2 = self.addPiece(Knight, "wN", i, 6)
 
-        bishop_w1 = Bishop(*self.addPiece("wB", i, 2))
-        bishop_w2 = Bishop(*self.addPiece("wB", i, 5))
+        bishop_w1 = self.addPiece(Bishop, "wB", i, 2)
+        bishop_w2 = self.addPiece(Bishop, "wB", i, 5)
 
-        queen_w = Queen(*self.addPiece("wQ", i, 3))
+        queen_w = self.addPiece(Queen, "wQ", i, 3)
 
-        king_w = King(*self.addPiece("wK", i, 4))
+        king_w = self.addPiece(King, "wK", i, 4)
 
         column = [rook_w1, knight_w1, bishop_w1, queen_w, king_w, bishop_w2, knight_w2, rook_w2]
         self.white_pieces += column
@@ -88,7 +88,7 @@ class Board:
             i = 1
 
         for j in range(8):
-            pawn_w = Pawn(*self.addPiece("wp", i, j))
+            pawn_w = self.addPiece(Pawn, "wp", i, j)
             self.white_pieces.append(pawn_w)
 
         if self.board_rotation:
@@ -99,7 +99,7 @@ class Board:
 
         # Black
         for j in range(8):
-            pawn_b = Pawn(*self.addPiece("bp", i, j))
+            pawn_b = self.addPiece(Pawn, "bp", i, j)
             self.black_pieces.append(pawn_b)
 
         if self.board_rotation:
@@ -108,18 +108,18 @@ class Board:
         else:
             i = 7
 
-        rook_b1 = Rook(*self.addPiece("bR", i, 0))
-        rook_b2 = Rook(*self.addPiece("bR", i, 7))
+        rook_b1 = self.addPiece(Rook, "bR", i, 0)
+        rook_b2 = self.addPiece(Rook, "bR", i, 7)
 
-        knight_b1 = Knight(*self.addPiece("bN", i, 1))
-        knight_b2 = Knight(*self.addPiece("bN", i, 6))
+        knight_b1 = self.addPiece(Knight ,"bN", i, 1)
+        knight_b2 = self.addPiece(Knight, "bN", i, 6)
 
-        bishop_b1 = Bishop(*self.addPiece("bB", i, 2))
-        bishop_b2 = Bishop(*self.addPiece("bB", i, 5))
+        bishop_b1 = self.addPiece(Bishop, "bB", i, 2)
+        bishop_b2 = self.addPiece(Bishop, "bB", i, 5)
 
-        queen_b = Queen(*self.addPiece("bQ", i, 3))
+        queen_b = self.addPiece(Queen, "bQ", i, 3)
 
-        king_b = King(*self.addPiece("bK", i, 4))
+        king_b = self.addPiece(King, "bK", i, 4)
 
         column = [rook_b1, knight_b1, bishop_b1, queen_b, king_b, bishop_b2, knight_b2, rook_b2]
         self.black_pieces += column
