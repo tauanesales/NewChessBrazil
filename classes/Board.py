@@ -156,9 +156,9 @@ class Board:
         else:  # retorna a(s) casa(s) às cores originais
             actual_square.status = 0
             actual_square.color = actual_square.o_color
-            self.reverseBoardColor()
+            self.revertBoardColor()
 
-    def reverseBoardColor(self):
+    def revertBoardColor(self):
         for line in self.board:
             for square in line:
                 
@@ -197,7 +197,7 @@ class Board:
         new_square = self.board[i][j]
         old_square = self.board[old_i][old_j]
 
-        if new_square.returnPieceColor() == None:
+        if new_square.returnPieceColor() is None:
             return None
 
         elif new_square.returnPieceColor() == old_square.returnPieceColor():
@@ -228,13 +228,13 @@ class Board:
         self.squareColorChange(old_i, old_j)
 
         coord = (i, j)
-    
+
         if new_square == old_square:
             coord = 0
 
         else:
             self.squareColorChange(i, j)
-            
+
         return coord
         
     def otherColorClick(self, i, j, old_i, old_j):
@@ -255,3 +255,7 @@ class Board:
 
     def capturePiece(self, old_square, new_square):
         return old_square.capturePiece(new_square, self)
+
+    def returnSquareXY(self, i, j):
+        square = self.board[i][j]
+        return square.height * square.i, square.width * square.j

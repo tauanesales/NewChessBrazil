@@ -1,5 +1,4 @@
-from classes.Colors import Color, sColor
-
+from pyglet import graphics
 
 class Square:
     def __init__(self, square, i, j, width, height, piece=None):
@@ -42,9 +41,14 @@ class Square:
         movelist = self.pieceMoveList(board, rotation)
         return self.piece.move(new_square, movelist)
 
-    def changeImageCoord(self):  # mudar coords da imagem
-        self.piece.image.x = self.j * self.width
-        self.piece.image.y = self.i * self.height
+    def changeImageCoord(self, xf = None, yf = None):  # mudar coords da imagem
+        if xf is None and yf is None:
+            self.piece.image.x = self.j * self.width
+            self.piece.image.y = self.i * self.height
+        else:
+            self.piece.image.x = xf
+            self.piece.image.y = yf
+            self.piece.image.group = graphics.OrderedGroup(1)
 
     def analyseCapture(self, new_square):  # verificar captura (útil quando implantar xeques)
         return self.piece.canCapture(new_square)

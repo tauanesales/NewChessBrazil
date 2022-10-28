@@ -14,7 +14,6 @@ class Piece(ABC):
         self.j = j
 
     def __eq__(self, other):
-
         if other is not None:
             return self.i == other.i and self.j == other.j
 
@@ -37,7 +36,7 @@ class Piece(ABC):
     def there_is_piece_between(self, i, j, board): #
         if self.isInRange(i, j):
 
-            if board[i][j].piece == None:
+            if board[i][j].piece is None:
                 return 0
 
             elif board[i][j].returnPieceColor() != self.color:
@@ -51,7 +50,7 @@ class Piece(ABC):
 
     # método de captura, não precisa verificar a cor, já implantado no move
     def canCapture(self, new_square):
-        if self.move and new_square.piece != None:
+        if self.move and new_square.piece is not None:
             return True
 
     def capture(self, new_square, board):
@@ -285,7 +284,7 @@ class Pawn(Piece):
 
         if rotation:
             possible_moves = [(-1*i[0], 0) for i in possible_moves]
-            capture_moves = [(-1*i[0], i[1]) for i in possible_moves]
+            capture_moves = [(-1*i[0], i[1]) for i in capture_moves]
 
         for move in possible_moves:
             if direction == 0:
