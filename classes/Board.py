@@ -1,83 +1,261 @@
-from classes.Piece import Color
+import pyglet
+from classes.Square import Square
+from classes.Piece import *
+from classes.Colors import *
+from random import choice
 
-class Square:
-  def __init__(self, square, x, y, width, height, piece = None):
-    self.square = square
-    self.x = x
-    self.y = y
-    self.width = width
-    self.height = height
-    self.piece = piece
-    self.status = 0
+class Board:
 
-  def returnPoint(self, x, y): # retorna True se for clicado na casa
-    return (self.x * self.width) <= x < (self.x + 1) * self.width \
-        and (self.y * self.height) <= y < (self.y + 1) * self.height
+    def __init__(self, width, height):
+        self.board = []
+        self.white_pieces = []
+        self.black_pieces = []
+        self.width = width
+        self.height = height
+        self.dimension = 8  # tabuleiro 8x8
+        self.images = {}  # dict de sprites das peças
+        self.batch = pyglet.graphics.Batch()  # batch para renderizar com mais eficiência
+        self.sprites = []  # lista dos shapes da casa para renderização (batch)
+        self.board_rotation = choice([False, True])
 
-  def returnCoordinates(self, x, y): # retorna as coordenadas da "matriz"
-    if self.returnPoint(x, y):
-      return self.x, self.y
+        self.loadImages()
+        self.createPieces()
 
-  def hasPiece(self, x, y): # verifica se há peça nessa casa
-    if self.returnPoint(x, y) and self.piece != None:
-      return True
+    @property
+    def square_size(self):
+        return self.height // self.dimension
 
-  def returnPieceColor(self): # retorna a cor da peça
-    if self.piece != None:
-      return self.piece.color
+    def loadImages(self):
+        pieces = ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR", "bp",
+                  "wp", "wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]
 
-  def drawPiece(self): # desenhar a peça na janela
-    if self.piece != None:
-      return self.piece.image.draw()
+        for piece in pieces:
+            self.images[piece] = pyglet.image.load("public/" + piece + ".png")
 
-  def squareColorChange(self, board): # mudança de cor no tabuleiro
-    colors = [(255, 255, 255), (128, 128, 128)]
-    moveList = self.pieceMoveList(board)
-    if self.status == 0: # caso não esteja clicado
-      self.status = 1
-      self.square.color = (0, 0, 255)
-      for square in moveList: # mudar a cor das casas que a peça pode mover
-        (x, y) = square
-        other_square = board[x+8*y]
-        if self.analyseCapture(other_square): # caso haja alguma peça capturável
-          other_square.square.color = (255, 0, 0)
+    def createBoard(self):  # criação do tabuleiro
+        colors = [(255, 255, 255), (128, 128, 128)]  # cor branca e cinza, alternância
+
+        for i in range(self.dimension):
+            line = []
+
+            for j in range(self.dimension):
+                color = colors[(i + j + 1) % 2]  # escolha da cor baseado na soma de linhas e colunas
+                rectangle = pyglet.shapes.Rectangle(x=self.square_size * j, y=self.square_size * i,
+                                                    batch=self.batch, width=self.square_size,
+                                                    height=self.square_size, color=color)
+                self.sprites.append(rectangle)
+                square = Square(rectangle, i, j, self.square_size, self.square_size)  # instância da casa
+                line.append(square)  # adicionar à matriz
+
+            self.board.append(line)
+
+    def addPiece(self, piece, id, i, j):
+        sprite = pyglet.sprite.Sprite(self.images[id], x = self.square_size*j,
+                                    y = self.square_size*i)
+
+        return piece(sprite, id, i, j)
+
+    def createPieces(self):  # inserção das peças, contidas na casa
+
+        self.createBoard()
+        pieces = []
+
+        if self.board_rotation:
+            i = 7
         else:
-          other_square.square.color = (128, 0, 0)
-    else: # retorna a(s) casa(s) às cores originais
-      self.status = 0
-      self.square.color = colors[(self.x + self.y + 1) % 2]
-      for square in moveList:
-        (x, y) = square
-        other_square = board[x + 8 * y]
-        other_square.square.color = colors[(x + y + 1) % 2]
+            i = 0
 
-  def onClick(self, gamestate, board): # efetuar a mudança da cor do tabuleiro caso o turno atual condizer à cor
-    if gamestate.whiteToMove == True and self.returnPieceColor() == Color.WHITE:
-      self.squareColorChange(board)
-      return True
-    elif gamestate.whiteToMove == False and self.returnPieceColor() == Color.BLACK:
-      self.squareColorChange(board)
-      return True
-    else:
-      pass
+        rook_w1 = self.addPiece(Rook, "wR", i, 0)
+        rook_w2 = self.addPiece(Rook, "wR", i, 7)
 
-  def pieceMoveList(self, board): # retorna a lista de movimentos possíveis da peça (lista de tuplas)
-    return self.piece.moveList(board)
+        knight_w1 = self.addPiece(Knight ,"wN", i, 1)
+        knight_w2 = self.addPiece(Knight, "wN", i, 6)
 
-  def analyseMove(self, new_square, board): # verificar se é possível mover através da lista
-    movelist = self.pieceMoveList(board)
-    return self.piece.move(new_square, movelist)
+        bishop_w1 = self.addPiece(Bishop, "wB", i, 2)
+        bishop_w2 = self.addPiece(Bishop, "wB", i, 5)
 
-  def changeImageCoord(self, xf, yf): # mudar coords da imagem
-      self.piece.image.x = xf*self.width
-      self.piece.image.y = yf*self.height
+        queen_w = self.addPiece(Queen, "wQ", i, 3)
 
-  def analyseCapture(self, new_square): # verificar captura (útil quando implantar xeques)
-    return self.piece.capture(new_square)
+        king_w = self.addPiece(King, "wK", i, 4)
 
-  def movePiece(self, new_square, board): # mover a peça de casa, vincula-a a nova e desvincula da atual
-    self.squareColorChange(board)
-    self.piece.x = new_square.x
-    self.piece.y = new_square.y
-    new_square.piece = self.piece
-    self.piece = None
+        column = [rook_w1, knight_w1, bishop_w1, queen_w, king_w, bishop_w2, knight_w2, rook_w2]
+        self.white_pieces += column
+
+        if self.board_rotation:
+            i = 6
+
+        else:
+            i = 1
+
+        for j in range(8):
+            pawn_w = self.addPiece(Pawn, "wp", i, j)
+            self.white_pieces.append(pawn_w)
+
+        if self.board_rotation:
+            i = 1
+
+        else:
+            i = 6
+
+        # Black
+        for j in range(8):
+            pawn_b = self.addPiece(Pawn, "bp", i, j)
+            self.black_pieces.append(pawn_b)
+
+        if self.board_rotation:
+            i = 0
+
+        else:
+            i = 7
+
+        rook_b1 = self.addPiece(Rook, "bR", i, 0)
+        rook_b2 = self.addPiece(Rook, "bR", i, 7)
+
+        knight_b1 = self.addPiece(Knight ,"bN", i, 1)
+        knight_b2 = self.addPiece(Knight, "bN", i, 6)
+
+        bishop_b1 = self.addPiece(Bishop, "bB", i, 2)
+        bishop_b2 = self.addPiece(Bishop, "bB", i, 5)
+
+        queen_b = self.addPiece(Queen, "bQ", i, 3)
+
+        king_b = self.addPiece(King, "bK", i, 4)
+
+        column = [rook_b1, knight_b1, bishop_b1, queen_b, king_b, bishop_b2, knight_b2, rook_b2]
+        self.black_pieces += column
+
+        pieces += self.white_pieces
+        pieces += self.black_pieces
+
+        for piece in pieces:
+            i, j = piece.i, piece.j
+            self.board[i][j].piece = piece
+
+    def squareColorChange(self, i, j):  # mudança de cor no tabuleiro
+        actual_square = self.board[i][j]
+        moveList = actual_square.pieceMoveList(self.board, self.board_rotation)
+
+        if actual_square.status == 0:  # caso não esteja clicado
+            actual_square.status = 1
+            actual_square.color = sColor.CLICKED.value
+
+            for coord in moveList:  # mudar a cor das casas que a peça pode mover
+                (old_i, old_j) = coord
+                other_square = self.board[old_i][old_j]
+
+                if actual_square.analyseCapture(other_square):  # caso haja alguma peça capturável
+                    other_square.color = sColor.CAPTURE.value
+
+                else:
+                  if other_square.o_color == sColor.WHITE.value:
+                    other_square.color = sColor.MOVEMENT.value
+
+                  else:
+                    other_square.color = sColor.MOVEMENT2.value
+
+        else:  # retorna a(s) casa(s) às cores originais
+            actual_square.status = 0
+            actual_square.color = actual_square.o_color
+            self.revertBoardColor()
+
+    def revertBoardColor(self):
+        for line in self.board:
+            for square in line:
+                
+                if square.color != square.o_color:
+                    square.color = square.o_color
+
+    def pieceClick(self, x, y, shift):
+        if shift:
+            for piece in self.white_pieces:
+                i, j = piece.i, piece.j
+                if piece.returnPoint(x, y, self.square_size, self.square_size):
+                    self.squareColorChange(i, j)
+                    return (i, j)
+
+        else:
+            for piece in self.black_pieces:
+                i, j = piece.i, piece.j
+                if piece.returnPoint(x, y, self.square_size, self.square_size):
+                    self.squareColorChange(i, j)
+                    return (i, j)
+
+        return 0
+
+    def squareClick(self, x, y):
+        i = j = None
+
+        for line in self.board:
+            for square in line:
+
+                if square.returnPoint(x, y):
+                    i, j = square.returnCoordinates(x, y)
+
+        return i, j
+
+    def isSameColor(self, i, j, old_i, old_j):
+        new_square = self.board[i][j]
+        old_square = self.board[old_i][old_j]
+
+        if new_square.returnPieceColor() is None:
+            return None
+
+        elif new_square.returnPieceColor() == old_square.returnPieceColor():
+            return True
+
+        else:
+            return False
+
+    def noColorClick(self, i, j, old_i, old_j):
+        new_square = self.board[i][j]
+        old_square = self.board[old_i][old_j]
+
+        args = (new_square, self.board, self.board_rotation)
+
+        self.squareColorChange(old_i, old_j)
+
+        if old_square.analyseMove(*args):
+            old_square.movePiece(new_square)
+            return 1
+
+        else:
+            return 0
+
+    def sameColorClick(self, i, j, old_i, old_j):
+        new_square = self.board[i][j]
+        old_square = self.board[old_i][old_j]
+
+        self.squareColorChange(old_i, old_j)
+
+        coord = (i, j)
+
+        if new_square == old_square:
+            coord = 0
+
+        else:
+            self.squareColorChange(i, j)
+
+        return coord
+        
+    def otherColorClick(self, i, j, old_i, old_j):
+        new_square = self.board[i][j]
+        old_square = self.board[old_i][old_j]
+
+        args = (new_square, self.board, self.board_rotation)
+
+        self.squareColorChange(old_i, old_j)
+
+        if old_square.analyseMove(*args):
+            self.capturePiece(old_square, new_square)
+            old_square.movePiece(new_square)
+            return 1
+
+        else:
+            return 0
+
+    def capturePiece(self, old_square, new_square):
+        return old_square.capturePiece(new_square, self)
+
+    def returnSquareXY(self, i, j):
+        square = self.board[i][j]
+        return square.height * square.i, square.width * square.j
