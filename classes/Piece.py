@@ -2,18 +2,16 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from pickle import FALSE
 
-
-class Color(Enum):  # uso do enum para as cores
+class Color(Enum): # uso do enum para as cores
     WHITE = 1
     BLACK = 2
 
-
 class Piece(ABC):
     def __init__(self, image, id, width, height, x, y):
-        self.image = image
-        self.id = id
-        self.width = width
-        self.height = height
+        self.image = image # desenho da peça
+        self.id = id # id da peça
+        self.width = width # largura da peça
+        self.height = height # altura da peça
         if self.id[0] == "w":
             self._color = Color.WHITE
         else:
@@ -232,15 +230,13 @@ class Pawn(Piece):
         super().__init__(image, id, width, height, x, y)
         self.already_moved = False
 
-
     def move(self, new_square, moveList):
 
-        if self.already_moved == False:
-            self.already_moved = True
         for move in moveList:
 
             if move == (new_square.x, new_square.y):
-       
+                if self.already_moved == False:
+                    self.already_moved = True
                 return True
 
     def moveList(self, board):
@@ -256,12 +252,11 @@ class Pawn(Piece):
                 xf = self.x + move[0]
                 yf = self.y + move[1]
 
-      
-                if self.there_is_piece_between(xf,yf,board) == -1:
+                if self.there_is_piece_between(xf, yf, board) == -1:
                     pass
-                elif self.there_is_piece_between(xf,yf,board) == 0:
-                    moveList.append((xf,yf))
-                elif self.there_is_piece_between(xf,yf,board) == 1:
+                elif self.there_is_piece_between(xf, yf, board) == 0:
+                    moveList.append((xf, yf))
+                elif self.there_is_piece_between(xf, yf, board) == 1:
                     pass
                 else:
                     pass
@@ -275,11 +270,11 @@ class Pawn(Piece):
                 xf = self.x + move[0]
                 yf = self.y + move[1]
 
-                if self.there_is_piece_between(xf,yf,board) == -1:
+                if self.there_is_piece_between(xf, yf, board) == -1:
                     pass
-                elif self.there_is_piece_between(xf,yf,board) == 0:
-                    moveList.append((xf,yf))
-                elif self.there_is_piece_between(xf,yf,board) == 1:
+                elif self.there_is_piece_between(xf, yf, board) == 0:
+                    moveList.append((xf, yf))
+                elif self.there_is_piece_between(xf, yf, board) == 1:
                     pass
                 else:
                     pass

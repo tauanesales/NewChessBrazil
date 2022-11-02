@@ -7,16 +7,15 @@ class Square:
     self.y = y
     self.width = width
     self.height = height
-    self.piece = piece
+    self.piece = piece # pode conter peça ou não
     self.status = 0
 
   def returnPoint(self, x, y): # retorna True se for clicado na casa
     return (self.x * self.width) <= x < (self.x + 1) * self.width \
         and (self.y * self.height) <= y < (self.y + 1) * self.height
 
-  def returnCoordinates(self, x, y): # retorna as coordenadas da "matriz"
-    if self.returnPoint(x, y):
-      return self.x, self.y
+  def returnCoordinates(self): # retorna as coordenadas da "matriz"
+    return self.x, self.y
 
   def hasPiece(self, x, y): # verifica se há peça nessa casa
     if self.returnPoint(x, y) and self.piece != None:
@@ -32,6 +31,7 @@ class Square:
 
   def squareColorChange(self, board): # mudança de cor no tabuleiro
     colors = [(255, 255, 255), (128, 128, 128)]
+    actual_x, actual_y = self.returnCoordinates()
     moveList = self.pieceMoveList(board)
     if self.status == 0: # caso não esteja clicado
       self.status = 1
@@ -49,7 +49,15 @@ class Square:
       for square in moveList:
         (x, y) = square
         other_square = board[x + 8 * y]
+        actual_square = board[actual_x + 8*actual_y]
         other_square.square.color = colors[(x + y + 1) % 2]
+        if type(actual_square.piece).__name__ == "Pawn": # mudança da cor da segunda casa do peão, sujeito a alterações
+          piece = actual_square.piece
+          if piece.color == Color.WHITE and board[actual_x + 8*(actual_y+2)].square.color != colors[(x + y + 1) % 2]:
+            board[actual_x + 8*(actual_y+2)].square.color = colors[(actual_x + actual_y + 2 + 1) % 2]
+          elif piece.color == Color.BLACK and board[actual_x + 8*(actual_y-2)].square.color != colors[(x + y + 1) % 2]:
+            board[actual_x + 8*(actual_y-2)].square.color = colors[(actual_x + actual_y + 2 + 1) % 2]
+
 
   def onClick(self, gamestate, board): # efetuar a mudança da cor do tabuleiro caso o turno atual condizer à cor
     if gamestate.whiteToMove == True and self.returnPieceColor() == Color.WHITE:
