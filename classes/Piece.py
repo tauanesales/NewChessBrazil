@@ -4,8 +4,8 @@ from classes.Colors import Color
 
 class Piece(ABC):
     def __init__(self, image, id, i, j):
-        self.image = image # desenho da peça
-        self.id = id # id da peça
+        self.image = image
+        self.id = id
         if self.id[0] == "w":
             self._color = Color.WHITE
         else:
