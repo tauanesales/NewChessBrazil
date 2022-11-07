@@ -3,6 +3,7 @@ from classes.Colors import Color
 
 
 class Piece(ABC):
+    
     def __init__(self, image, id, i, j):
         self.image = image # desenho da peça
         self.id = id # id da peça
@@ -70,6 +71,7 @@ class Piece(ABC):
             return True
 
 class Rook(Piece):
+    ID = "R"
     def __init__(self, image, id, i, j):
         super().__init__(image, id, i, j)
 
@@ -118,9 +120,11 @@ class Rook(Piece):
 
 
 class Knight(Piece):
+    
+    ID = "N"
     def __init__(self, image, id, i, j):
         super().__init__(image, id, i, j)
-
+    
     def moveList(self, board, rotation):  # lista de movimentos
         moveList = []
         possible_indexes = [1, -1, 2, -2]  # lista para iteração
@@ -147,6 +151,7 @@ class Knight(Piece):
 
 
 class Bishop(Piece):
+    ID = "B"
     def __init__(self, image, id, i, j):
         super().__init__(image, id, i, j)
 
@@ -197,6 +202,7 @@ class Bishop(Piece):
         return movelist
 
 class Queen(Piece):
+    ID = "Q"
     def __init__(self, image, id, i, j):
         super().__init__(image, id, i, j)
 
@@ -213,6 +219,7 @@ class Queen(Piece):
         return movelist
 
 class King(Piece):
+    ID = "K"
     def __init__(self, image, id, i, j):
         super().__init__(image, id, i, j)
 
@@ -245,6 +252,7 @@ class King(Piece):
 
 
 class Pawn(Piece):
+    ID = "p"
     def __init__(self, image, id, i, j):
         super().__init__(image, id, i, j)
         self.already_moved = False
