@@ -4,6 +4,7 @@ class GameState():
         self.whiteToMove = True  # turno das brancas
         self.clicked = 0  # verifica a peça que foi clicada
         self.moveLog = []
+        self.check = False
 
     def shiftChange(self):  # mudança de turno
         if self.whiteToMove == True:

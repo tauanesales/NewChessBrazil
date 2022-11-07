@@ -207,7 +207,7 @@ class Board:
         else:
             return False
 
-    def noColorClick(self, i, j, old_i, old_j):
+    def noColorClick(self, i, j, old_i, old_j,gamestate):
         new_square = self.board[i][j]
         old_square = self.board[old_i][old_j]
 
@@ -216,7 +216,7 @@ class Board:
         self.squareColorChange(old_i, old_j)
 
         if old_square.analyseMove(*args):
-            old_square.movePiece(new_square)
+            old_square.movePiece(new_square,self,gamestate)
             return 1
 
         else:
@@ -238,7 +238,7 @@ class Board:
 
         return coord
         
-    def otherColorClick(self, i, j, old_i, old_j):
+    def otherColorClick(self, i, j, old_i, old_j,gamestate):
         new_square = self.board[i][j]
         old_square = self.board[old_i][old_j]
 
@@ -248,7 +248,7 @@ class Board:
 
         if old_square.analyseMove(*args):
             self.capturePiece(old_square, new_square)
-            old_square.movePiece(new_square)
+            old_square.movePiece(new_square,self,gamestate)
             return 1
 
         else:

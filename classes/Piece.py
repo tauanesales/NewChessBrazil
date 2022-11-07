@@ -29,7 +29,23 @@ class Piece(ABC):
     @abstractmethod
     def moveList(self, board, rotation):
         pass
+    
+    def isCheck(self, board):
+        possible_moves = self.moveList(board.board, board.board_rotation)
+        check = False
+        for move in possible_moves:
+            i,j = move
 
+            piece_in_square = board.board[i][j].piece
+            if piece_in_square is not None:
+                if piece_in_square.ID == King.ID and self.color != piece_in_square.color:
+                    check = True
+                    print("check")
+
+
+        return check
+
+    
     def returnPoint(self, x, y, width, height):  # retorna True se for clicado na casa
         return (self.i * width) <= y < (self.i + 1) * width \
                and (self.j * height) <= x < (self.j + 1) * height
