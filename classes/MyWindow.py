@@ -1,53 +1,78 @@
 import pyglet
 
+
 class MyWindow(pyglet.window.Window):
-    def __init__(self, width, height, board, running, gamestate, batch):
+
+    def __init__(self, width, height, board, running, gamestate):
         super().__init__(width, height, caption="Chess")
         self.board = board
         self.running = running
-        self.gamestate = gamestate
-        self.batch = batch
+        self.gs = gamestate
+        self.batch = self.board.batch
+        self.drag = 0
+        self.click_x = 0
+        self.click_y = 0
+
+    def boardSquare(self, i, j):
+        return self.board.board[i][j]
+
+    def drag_circle(self, x, y, value):
+        return ((x - self.click_x)**2 + (y - self.click_y)**2) > value**2
 
     def on_draw(self):
-
         if self.running:
-
             self.clear()
-
             self.batch.draw()  # desenhar batches devido ao alto número de shapes
 
-            for rect in self.board:  # desenhar as peças normalmente
-                rect.drawPiece()
+            for line in self.board.board:  # desenhar as peças normalmente
+                for square in line:
+                    square.drawPiece()
 
     def on_mouse_press(self, x, y, button, modifiers):
+        if self.gs.clicked == 0 or self.gs.clicked == 1:
+            self.gs.clicked = self.board.pieceClick(x, y, self.gs.whiteToMove)
 
-        if self.gamestate.clicked == 0:  # tabuleiro não clicado
-
-            for rect in self.board:
-                if rect.hasPiece(x, y) and rect.onClick(self.gamestate,
-                                                        self.board):  # se tiver peça na casa e se a peça é a mesma cor do turno atual
-                    self.gamestate.clicked = rect.returnCoordinates()  # em vez de retornar 1, melhor retornar as coordenadas da peça clicada
+            if type(self.gs.clicked) == tuple:
+                self.click_x = x
+                self.click_y = y
 
         else:
-            for new_square in self.board:
-                if new_square.returnPoint(x, y):  # verificar onde foi clicado
-                    xf, yf = new_square.returnCoordinates()  # coordenadas novas/finais
-                    (xi, yi) = self.gamestate.clicked  # receber as coordenadas do gamestate para comparação
-                    old_square = self.board[xi + yi * 8]  # coords do tabuleiro antigo na lista do tabuleiro
-                    if old_square.analyseMove(new_square, self.board):  # verificar se é possível mover
-                        old_square.movePiece(new_square, self.board)  # mover a peça de coordenada
-                        new_square.changeImageCoord(xf, yf)  # mudar as coordenadas do sprite da peça
-                        self.gamestate.shiftChange()  # mudar turno
-                        self.gamestate.clicked = 0  # retornar ao status 0
-                    else:  # se não for possível mover para o lugar
-                        if new_square.returnPieceColor() == old_square.returnPieceColor():  # se a peça clicada for da mesma cor
-                            old_square.squareColorChange(self.board)  # "retornar" a casa anterior à cor original
-                            self.gamestate.clicked = 0
-                            if new_square != old_square:  # se a peça clicada não for a mesma, para efetuar o clique na outra peça
-                                new_square.squareColorChange(self.board)
-                                self.gamestate.clicked = new_square.returnCoordinates()
-                        elif new_square.piece == None:  # se não houver peças na casa clicada, para "desclicar"
-                            old_square.squareColorChange(self.board)
-                            self.gamestate.clicked = 0
-                        else:  # caso a peça for da outra cor, não é necessário, mas caso queira remover
-                            pass
+            old_i, old_j = self.gs.clicked
+            i, j = self.board.squareClick(x, y)
+            args = (i, j, old_i, old_j)
+
+            if self.board.isSameColor(*args) is None:
+                self.gs.clicked = self.board.noColorClick(*args, self.gs)
+
+            elif self.board.isSameColor(*args) == True:
+                self.gs.clicked = self.board.sameColorClick(*args)
+
+            else:
+                self.gs.clicked = self.board.otherColorClick(*args,self.gs)
+
+            if self.gs.clicked == 1:
+                self.gs.shiftChange()
+
+    def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
+        if pyglet.window.mouse.LEFT and type(self.gs.clicked) == tuple:
+            i, j = self.gs.clicked
+
+            if self.drag_circle(x, y, 5) and self.drag == 0:
+                yi, xi = self.board.returnSquareXY(i, j)
+                self.click_x, self.click_y = x - xi, y -yi # delta x, delta y
+                self.drag = 1
+
+            elif self.drag == 1:
+                self.boardSquare(i, j).changeImageCoord(x - self.click_x, y - self.click_y)
+
+    def on_mouse_release(self, x, y, button, modifiers):
+        if pyglet.window.mouse.LEFT and type(self.gs.clicked) == tuple:
+            old_i, old_j = self.gs.clicked
+            self.boardSquare(old_i, old_j).changeImageCoord()
+
+            if self.drag == 1:
+                self.on_mouse_press(x, y, button, modifiers)
+                self.drag = 0
+
+
+                
