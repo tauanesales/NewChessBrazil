@@ -206,8 +206,18 @@ class Board:
 
         else:
             return False
+    
+    def dragSquareSwitch(self, coord, clicked):
+        if type(coord) == type(clicked):
+            (i, j) = coord
+            (other_i, other_j) = clicked
+            self.squareColorChange(i, j)
 
-    def noColorClick(self, i, j, old_i, old_j,gamestate):
+            if coord != clicked:
+                self.squareColorChange(other_i, other_j)
+                self.squareColorChange(i, j)
+
+    def noColorClick(self, i, j, old_i, old_j, gs):
         new_square = self.board[i][j]
         old_square = self.board[old_i][old_j]
 
@@ -216,13 +226,23 @@ class Board:
         self.squareColorChange(old_i, old_j)
 
         if old_square.analyseMove(*args):
-            old_square.movePiece(new_square,self,gamestate)
+            old_square.movePiece(new_square, self, gs)
             return 1
 
         else:
             return 0
 
-    def sameColorClick(self, i, j, old_i, old_j):
+    def samePieceClick(self, i, j, drag):
+        if drag == 0:
+            coord = 0
+
+        else:
+            self.squareColorChange(i, j)
+            coord = (i, j)
+
+        return coord
+
+    def sameColorClick(self, i, j, old_i, old_j, drag):
         new_square = self.board[i][j]
         old_square = self.board[old_i][old_j]
 
@@ -231,13 +251,14 @@ class Board:
         coord = (i, j)
 
         if new_square == old_square:
-            coord = 0
+            coord = self.samePieceClick(i, j, drag)
 
         else:
             self.squareColorChange(i, j)
 
         return coord
-        
+
+
     def otherColorClick(self, i, j, old_i, old_j,gamestate):
         new_square = self.board[i][j]
         old_square = self.board[old_i][old_j]

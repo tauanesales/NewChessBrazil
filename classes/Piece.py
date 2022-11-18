@@ -3,9 +3,10 @@ from classes.Colors import Color
 
 
 class Piece(ABC):
+    
     def __init__(self, image, id, i, j):
-        self.image = image
-        self.id = id
+        self.image = image # desenho da peça
+        self.id = id # id da peça
         if self.id[0] == "w":
             self._color = Color.WHITE
         else:
@@ -28,6 +29,76 @@ class Piece(ABC):
     @abstractmethod
     def moveList(self, board, rotation):
         pass
+    
+    def isCheck(self, board,gamestate):
+        # possible_moves = self.moveList(board.board, board.board_rotation)
+
+        counter = 0
+        enemy_king = None
+        if gamestate.whiteToMove:
+            
+            for white_piece in board.white_pieces:
+               
+                for move in white_piece.moveList(board.board, board.board_rotation):
+                    i,j = move
+
+                    piece_in_square = board.board[i][j].piece
+                    if piece_in_square is not None:
+                        if piece_in_square.ID == King.ID and self.color != piece_in_square.color:
+                            check = True
+                            counter += 1
+
+
+                            enemy_king = piece_in_square
+                            print("check")
+                            # Se a peça no quadrado for o rei alteramos o atributo para representar q ele estar sendo atacado
+                            
+
+        else:
+             for black_piece in board.black_pieces:
+               
+                for move in black_piece.moveList(board.board, board.board_rotation):
+                    i,j = move
+
+                    piece_in_square = board.board[i][j].piece
+                    if piece_in_square is not None:
+                        if piece_in_square.ID == King.ID and self.color != piece_in_square.color:
+                            check = True
+                            counter += 1
+                            
+                            enemy_king = piece_in_square
+                            print("check")
+                            # Se a peça no quadrado for o rei alteramos o atributo para representar q ele estar sendo atacado           
+        
+        if counter == 0:
+            gamestate.check = False
+            gamestate.doubleCheck = False
+
+        elif counter == 1:
+
+            enemy_king.check = True
+            enemy_king.doubleCheck = False
+
+            gamestate.check = True
+            gamestate.doublecheck = False
+
+        elif counter == 2:
+
+            enemy_king.check = False
+            enemy_king.doubleCheck = True
+
+            gamestate.check = False
+            gamestate.doubleCheck = True
+            
+        else:
+            
+            enemy_king.check = False
+            enemy_king.doubleCheck = False
+
+            gamestate.check = False
+            gamestate.doubleCheck = False
+             
+
 
     def returnPoint(self, x, y, width, height):  # retorna True se for clicado na casa
         return (self.i * width) <= y < (self.i + 1) * width \
@@ -48,51 +119,6 @@ class Piece(ABC):
         else:
             return -1
 
-    def isCheck(self, board,gamestate):
-    # possible_moves = self.moveList(board.board, board.board_rotation)
-
-        counter = 0
-        if gamestate.whiteToMove:
-            
-            for white_piece in board.white_pieces:
-                
-                for move in white_piece.moveList(board.board, board.board_rotation):
-                    i,j = move
-
-                    piece_in_square = board.board[i][j].piece
-                    if piece_in_square is not None:
-                        if piece_in_square.ID == King.ID and self.color != piece_in_square.color:
-                            check = True
-                            counter += 1
-                            print("check")
-                            # Se a peça no quadrado for o rei alteramos o atributo para representar q ele estar sendo atacado
-                            
-
-        else:
-            for black_piece in board.black_pieces:
-                
-                for move in black_piece.moveList(board.board, board.board_rotation):
-                    i,j = move
-
-                    piece_in_square = board.board[i][j].piece
-                    if piece_in_square is not None:
-                        if piece_in_square.ID == King.ID and self.color != piece_in_square.color:
-                            check = True
-                            counter += 1
-                            print("check")
-                            # Se a peça no quadrado for o rei alteramos o atributo para representar q ele estar sendo atacado           
-        
-        if counter == 1:
-
-            gamestate.check = True
-            gamestate.doublecheck = False
-        elif counter == 2:
-            gamestate.check = False
-            gamestate.doubleCheck = True
-        else:
-            gamestate.check = False
-            gamestate.doubleCheck = False
-                
     # método de captura, não precisa verificar a cor, já implantado no move
     def canCapture(self, new_square):
         if self.move and new_square.piece is not None:
@@ -115,6 +141,7 @@ class Piece(ABC):
             return True
 
 class Rook(Piece):
+    ID = "R"
     def __init__(self, image, id, i, j):
         super().__init__(image, id, i, j)
 
@@ -163,9 +190,11 @@ class Rook(Piece):
 
 
 class Knight(Piece):
+    
+    ID = "N"
     def __init__(self, image, id, i, j):
         super().__init__(image, id, i, j)
-
+    
     def moveList(self, board, rotation):  # lista de movimentos
         moveList = []
         possible_indexes = [1, -1, 2, -2]  # lista para iteração
@@ -192,6 +221,7 @@ class Knight(Piece):
 
 
 class Bishop(Piece):
+    ID = "B"
     def __init__(self, image, id, i, j):
         super().__init__(image, id, i, j)
 
@@ -242,6 +272,7 @@ class Bishop(Piece):
         return movelist
 
 class Queen(Piece):
+    ID = "Q"
     def __init__(self, image, id, i, j):
         super().__init__(image, id, i, j)
 
@@ -258,8 +289,11 @@ class Queen(Piece):
         return movelist
 
 class King(Piece):
+    ID = "K"
     def __init__(self, image, id, i, j):
         super().__init__(image, id, i, j)
+        self.check = False
+        self.doubleCheck = False
 
     def moveList(self, board, rotation):
         kingMoves = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
@@ -267,6 +301,8 @@ class King(Piece):
         for i in range(8):
             i_final = self.i + kingMoves[i][0]
             j_final = self.j + kingMoves[i][1]
+        
+        
 
             if self.there_is_piece_between(i_final, j_final, board) == -1:
                 pass
@@ -279,8 +315,30 @@ class King(Piece):
 
             else:
                 pass
-
+        
+        # for move in movelist:
+        #     if self.isAttacked(board,move):
+        #         movelist.remove(move)
+            
         return movelist
+
+    def isAttacked(self,board,position):
+        attacked = False
+        if self.color == Color.WHITE:
+            for black_piece in board.black_pieces:
+               
+                for move in black_piece.moveList(board.board, board.board_rotation):
+                    i,j = move
+                    if i == position[0] and j == position[1]:
+                        attacked = True
+        else:
+            for white_piece in board.white_pieces:
+               
+                for move in white_piece.moveList(board.board, board.board_rotation):
+                    i,j = move
+                    if i == position[0] and j == position[1]:
+                        attacked = True
+        return attacked
 
     def move(self, new_square, movelist):
         for i in movelist:
@@ -290,6 +348,7 @@ class King(Piece):
 
 
 class Pawn(Piece):
+    ID = "p"
     def __init__(self, image, id, i, j):
         super().__init__(image, id, i, j)
         self.already_moved = False
