@@ -11,5 +11,5 @@ class sColor(Enum): # cores para customizar o tabuleiro (até implementar outros
 
 
 class Color(Enum): # uso do enum para as cores
-    WHITE = 1
-    BLACK = 2
+    WHITE = "w"
+    BLACK = "b"

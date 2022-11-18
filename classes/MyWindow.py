@@ -52,7 +52,6 @@ class MyWindow(pyglet.window.Window):
                 i, j = self.board.squareClick(self.click_x, self.click_y)
                 self.boardSquare(i, j).changeImageCoord(x - self.delta_x, y - self.delta_y)
 
-
     def on_mouse_release(self, x, y, button, modifiers):
         if pyglet.window.mouse.LEFT:
             if self.drag == 0 and type(self.gs.clicked) == int:
@@ -78,7 +77,7 @@ class MyWindow(pyglet.window.Window):
                         self.gs.clicked = self.board.sameColorClick(*args, self.drag)
 
                     else:
-                        self.gs.clicked = self.board.otherColorClick(*args)
+                        self.gs.clicked = self.board.otherColorClick(*args,self.gs)
 
                     if self.gs.clicked == 1:
                         self.gs.shiftChange()
