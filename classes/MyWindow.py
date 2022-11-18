@@ -12,6 +12,8 @@ class MyWindow(pyglet.window.Window):
         self.drag = 0
         self.click_x = 0
         self.click_y = 0
+        self.delta_x = 0
+        self.delta_y = 0
 
     def boardSquare(self, i, j):
         return self.board.board[i][j]
@@ -29,47 +31,57 @@ class MyWindow(pyglet.window.Window):
                     square.drawPiece()
 
     def on_mouse_press(self, x, y, button, modifiers):
-        if self.gs.clicked == 0 or self.gs.clicked == 1:
-            self.gs.clicked = self.board.pieceClick(x, y, self.gs.whiteToMove)
-
-            if type(self.gs.clicked) == tuple:
-                self.click_x = x
-                self.click_y = y
-
-        else:
-            old_i, old_j = self.gs.clicked
-            i, j = self.board.squareClick(x, y)
-            args = (i, j, old_i, old_j)
-
-            if self.board.isSameColor(*args) is None:
-                self.gs.clicked = self.board.noColorClick(*args, self.gs)
-
-            elif self.board.isSameColor(*args) == True:
-                self.gs.clicked = self.board.sameColorClick(*args)
-
-            else:
-                self.gs.clicked = self.board.otherColorClick(*args,self.gs)
-
-            if self.gs.clicked == 1:
-                self.gs.shiftChange()
+        self.click_x = x
+        self.click_y = y
 
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
-        if pyglet.window.mouse.LEFT and type(self.gs.clicked) == tuple:
-            i, j = self.gs.clicked
+        if pyglet.window.mouse.LEFT:
 
             if self.drag_circle(x, y, 5) and self.drag == 0:
-                yi, xi = self.board.returnSquareXY(i, j)
-                self.click_x, self.click_y = x - xi, y -yi # delta x, delta y
-                self.drag = 1
+                coord = self.board.pieceClick(self.click_x, self.click_y, self.gs.whiteToMove)
+
+                if type(coord) == tuple:
+                    (i, j) = coord
+                    yi, xi = self.board.returnSquareXY(i, j)
+                    self.delta_x, self.delta_y = x - xi, y -yi
+                    self.board.dragSquareSwitch(coord, self.gs.clicked)
+                    self.gs.clicked = coord
+                    self.drag = 1
 
             elif self.drag == 1:
-                self.boardSquare(i, j).changeImageCoord(x - self.click_x, y - self.click_y)
+                i, j = self.board.squareClick(self.click_x, self.click_y)
+                self.boardSquare(i, j).changeImageCoord(x - self.delta_x, y - self.delta_y)
+
 
     def on_mouse_release(self, x, y, button, modifiers):
-        if pyglet.window.mouse.LEFT and type(self.gs.clicked) == tuple:
-            old_i, old_j = self.gs.clicked
-            self.boardSquare(old_i, old_j).changeImageCoord()
+        if pyglet.window.mouse.LEFT:
+            if self.drag == 0 and type(self.gs.clicked) == int:
+                self.gs.clicked = self.board.pieceClick(x, y, self.gs.whiteToMove)
+
+            elif type(self.gs.clicked) == tuple:
+                old_i, old_j = self.gs.clicked
+                self.boardSquare(old_i, old_j).changeImageCoord()
+
+                try:
+                    i, j = self.board.squareClick(x, y)
+
+                except TypeError:
+                    pass
+
+                else:
+                    args = (i, j, old_i, old_j)
+
+                    if self.board.isSameColor(*args) is None:
+                        self.gs.clicked = self.board.noColorClick(*args, self.gs)
+
+                    elif self.board.isSameColor(*args) == True:
+                        self.gs.clicked = self.board.sameColorClick(*args, self.drag)
+
+                    else:
+                        self.gs.clicked = self.board.otherColorClick(*args)
+
+                    if self.gs.clicked == 1:
+                        self.gs.shiftChange()
 
             if self.drag == 1:
-                self.on_mouse_press(x, y, button, modifiers)
                 self.drag = 0

@@ -4,6 +4,7 @@ from classes.Piece import *
 from classes.Colors import *
 from random import choice
 
+
 class Board:
 
     def __init__(self, width, height):
@@ -49,10 +50,9 @@ class Board:
 
             self.board.append(line)
 
-    def addPiece(self, piece, color, i, j):
-        id = color.value + piece.ID
-        sprite = pyglet.sprite.Sprite(self.images[id], x = self.square_size*j,
-                                    y = self.square_size*i)
+    def addPiece(self, piece, id, i, j):
+        sprite = pyglet.sprite.Sprite(self.images[id], x=self.square_size * j,
+                                      y=self.square_size * i)
 
         return piece(sprite, id, i, j)
 
@@ -66,18 +66,18 @@ class Board:
         else:
             i = 0
 
-        rook_w1 = self.addPiece(Rook, Color.WHITE, i, 0)
-        rook_w2 = self.addPiece(Rook, Color.WHITE, i, 7)
+        rook_w1 = self.addPiece(Rook, "wR", i, 0)
+        rook_w2 = self.addPiece(Rook, "wR", i, 7)
 
-        knight_w1 = self.addPiece(Knight ,Color.WHITE, i, 1)
-        knight_w2 = self.addPiece(Knight, Color.WHITE, i, 6)
+        knight_w1 = self.addPiece(Knight, "wN", i, 1)
+        knight_w2 = self.addPiece(Knight, "wN", i, 6)
 
-        bishop_w1 = self.addPiece(Bishop, Color.WHITE, i, 2)
-        bishop_w2 = self.addPiece(Bishop, Color.WHITE, i, 5)
+        bishop_w1 = self.addPiece(Bishop, "wB", i, 2)
+        bishop_w2 = self.addPiece(Bishop, "wB", i, 5)
 
-        queen_w = self.addPiece(Queen, Color.WHITE, i, 3)
+        queen_w = self.addPiece(Queen, "wQ", i, 3)
 
-        king_w = self.addPiece(King, Color.WHITE, i, 4)
+        king_w = self.addPiece(King, "wK", i, 4)
 
         column = [rook_w1, knight_w1, bishop_w1, queen_w, king_w, bishop_w2, knight_w2, rook_w2]
         self.white_pieces += column
@@ -89,7 +89,7 @@ class Board:
             i = 1
 
         for j in range(8):
-            pawn_w = self.addPiece(Pawn, Color.WHITE, i, j)
+            pawn_w = self.addPiece(Pawn, "wp", i, j)
             self.white_pieces.append(pawn_w)
 
         if self.board_rotation:
@@ -100,7 +100,7 @@ class Board:
 
         # Black
         for j in range(8):
-            pawn_b = self.addPiece(Pawn, Color.BLACK, i, j)
+            pawn_b = self.addPiece(Pawn, "bp", i, j)
             self.black_pieces.append(pawn_b)
 
         if self.board_rotation:
@@ -109,18 +109,18 @@ class Board:
         else:
             i = 7
 
-        rook_b1 = self.addPiece(Rook, Color.BLACK, i, 0)
-        rook_b2 = self.addPiece(Rook, Color.BLACK, i, 7)
+        rook_b1 = self.addPiece(Rook, "bR", i, 0)
+        rook_b2 = self.addPiece(Rook, "bR", i, 7)
 
-        knight_b1 = self.addPiece(Knight ,Color.BLACK, i, 1)
-        knight_b2 = self.addPiece(Knight, Color.BLACK, i, 6)
+        knight_b1 = self.addPiece(Knight, "bN", i, 1)
+        knight_b2 = self.addPiece(Knight, "bN", i, 6)
 
-        bishop_b1 = self.addPiece(Bishop, Color.BLACK, i, 2)
-        bishop_b2 = self.addPiece(Bishop, Color.BLACK, i, 5)
+        bishop_b1 = self.addPiece(Bishop, "bB", i, 2)
+        bishop_b2 = self.addPiece(Bishop, "bB", i, 5)
 
-        queen_b = self.addPiece(Queen, Color.BLACK, i, 3)
+        queen_b = self.addPiece(Queen, "bQ", i, 3)
 
-        king_b = self.addPiece(King, Color.BLACK, i, 4)
+        king_b = self.addPiece(King, "bK", i, 4)
 
         column = [rook_b1, knight_b1, bishop_b1, queen_b, king_b, bishop_b2, knight_b2, rook_b2]
         self.black_pieces += column
@@ -148,11 +148,11 @@ class Board:
                     other_square.color = sColor.CAPTURE.value
 
                 else:
-                  if other_square.o_color == sColor.WHITE.value:
-                    other_square.color = sColor.MOVEMENT.value
+                    if other_square.o_color == sColor.WHITE.value:
+                        other_square.color = sColor.MOVEMENT.value
 
-                  else:
-                    other_square.color = sColor.MOVEMENT2.value
+                    else:
+                        other_square.color = sColor.MOVEMENT2.value
 
         else:  # retorna a(s) casa(s) às cores originais
             actual_square.status = 0
@@ -162,7 +162,7 @@ class Board:
     def revertBoardColor(self):
         for line in self.board:
             for square in line:
-                
+
                 if square.color != square.o_color:
                     square.color = square.o_color
 
@@ -207,7 +207,17 @@ class Board:
         else:
             return False
 
-    def noColorClick(self, i, j, old_i, old_j,gamestate):
+    def dragSquareSwitch(self, coord, clicked):
+        if type(coord) == type(clicked):
+            (i, j) = coord
+            (other_i, other_j) = clicked
+            self.squareColorChange(i, j)
+
+            if coord != clicked:
+                self.squareColorChange(other_i, other_j)
+                self.squareColorChange(i, j)
+
+    def noColorClick(self, i, j, old_i, old_j, gs):
         new_square = self.board[i][j]
         old_square = self.board[old_i][old_j]
 
@@ -216,13 +226,23 @@ class Board:
         self.squareColorChange(old_i, old_j)
 
         if old_square.analyseMove(*args):
-            old_square.movePiece(new_square,self,gamestate)
+            old_square.movePiece(new_square, self.board, gs)
             return 1
 
         else:
             return 0
 
-    def sameColorClick(self, i, j, old_i, old_j):
+    def samePieceClick(self, i, j, drag):
+        if drag == 0:
+            coord = 0
+
+        else:
+            self.squareColorChange(i, j)
+            coord = (i, j)
+
+        return coord
+
+    def sameColorClick(self, i, j, old_i, old_j, drag):
         new_square = self.board[i][j]
         old_square = self.board[old_i][old_j]
 
@@ -231,14 +251,14 @@ class Board:
         coord = (i, j)
 
         if new_square == old_square:
-            coord = 0
+            coord = self.samePieceClick(i, j, drag)
 
         else:
             self.squareColorChange(i, j)
 
         return coord
-        
-    def otherColorClick(self, i, j, old_i, old_j,gamestate):
+
+    def otherColorClick(self, i, j, old_i, old_j):
         new_square = self.board[i][j]
         old_square = self.board[old_i][old_j]
 
@@ -248,7 +268,7 @@ class Board:
 
         if old_square.analyseMove(*args):
             self.capturePiece(old_square, new_square)
-            old_square.movePiece(new_square,self,gamestate)
+            old_square.movePiece(new_square)
             return 1
 
         else:
