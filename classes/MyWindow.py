@@ -72,7 +72,7 @@ class MyWindow(pyglet.window.Window):
                     args = (i, j, old_i, old_j)
 
                     if self.board.isSameColor(*args) is None:
-                        self.gs.clicked = self.board.noColorClick(*args)
+                        self.gs.clicked = self.board.noColorClick(*args, self.gs)
 
                     elif self.board.isSameColor(*args) == True:
                         self.gs.clicked = self.board.sameColorClick(*args, self.drag)

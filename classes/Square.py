@@ -53,12 +53,14 @@ class Square:
     def analyseCapture(self, new_square):  # verificar captura (útil quando implantar xeques)
         return self.piece.canCapture(new_square)
 
-    def movePiece(self, new_square):  # mover a peça de casa, vincula-a a nova e desvincula da atual
+    def movePiece(self, new_square, board, gamestate):  # mover a peça de casa, vincula-a a nova e desvincula da atual
         self.piece.i = new_square.i
         self.piece.j = new_square.j
         new_square.piece = self.piece
         self.piece = None
         new_square.changeImageCoord()
-
+        
+        gamestate.check = new_square.piece.isCheck(board)
+        
     def capturePiece(self, new_square, board):
         return self.piece.capture(new_square, board)

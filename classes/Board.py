@@ -4,6 +4,7 @@ from classes.Piece import *
 from classes.Colors import *
 from random import choice
 
+
 class Board:
 
     def __init__(self, width, height):
@@ -50,8 +51,8 @@ class Board:
             self.board.append(line)
 
     def addPiece(self, piece, id, i, j):
-        sprite = pyglet.sprite.Sprite(self.images[id], x = self.square_size*j,
-                                    y = self.square_size*i)
+        sprite = pyglet.sprite.Sprite(self.images[id], x=self.square_size * j,
+                                      y=self.square_size * i)
 
         return piece(sprite, id, i, j)
 
@@ -68,7 +69,7 @@ class Board:
         rook_w1 = self.addPiece(Rook, "wR", i, 0)
         rook_w2 = self.addPiece(Rook, "wR", i, 7)
 
-        knight_w1 = self.addPiece(Knight ,"wN", i, 1)
+        knight_w1 = self.addPiece(Knight, "wN", i, 1)
         knight_w2 = self.addPiece(Knight, "wN", i, 6)
 
         bishop_w1 = self.addPiece(Bishop, "wB", i, 2)
@@ -111,7 +112,7 @@ class Board:
         rook_b1 = self.addPiece(Rook, "bR", i, 0)
         rook_b2 = self.addPiece(Rook, "bR", i, 7)
 
-        knight_b1 = self.addPiece(Knight ,"bN", i, 1)
+        knight_b1 = self.addPiece(Knight, "bN", i, 1)
         knight_b2 = self.addPiece(Knight, "bN", i, 6)
 
         bishop_b1 = self.addPiece(Bishop, "bB", i, 2)
@@ -147,11 +148,11 @@ class Board:
                     other_square.color = sColor.CAPTURE.value
 
                 else:
-                  if other_square.o_color == sColor.WHITE.value:
-                    other_square.color = sColor.MOVEMENT.value
+                    if other_square.o_color == sColor.WHITE.value:
+                        other_square.color = sColor.MOVEMENT.value
 
-                  else:
-                    other_square.color = sColor.MOVEMENT2.value
+                    else:
+                        other_square.color = sColor.MOVEMENT2.value
 
         else:  # retorna a(s) casa(s) às cores originais
             actual_square.status = 0
@@ -161,7 +162,7 @@ class Board:
     def revertBoardColor(self):
         for line in self.board:
             for square in line:
-                
+
                 if square.color != square.o_color:
                     square.color = square.o_color
 
@@ -216,7 +217,7 @@ class Board:
                 self.squareColorChange(other_i, other_j)
                 self.squareColorChange(i, j)
 
-    def noColorClick(self, i, j, old_i, old_j):
+    def noColorClick(self, i, j, old_i, old_j, gs):
         new_square = self.board[i][j]
         old_square = self.board[old_i][old_j]
 
@@ -225,7 +226,7 @@ class Board:
         self.squareColorChange(old_i, old_j)
 
         if old_square.analyseMove(*args):
-            old_square.movePiece(new_square)
+            old_square.movePiece(new_square, self.board, gs)
             return 1
 
         else:
@@ -238,7 +239,6 @@ class Board:
         else:
             self.squareColorChange(i, j)
             coord = (i, j)
-
 
         return coord
 
@@ -257,7 +257,7 @@ class Board:
             self.squareColorChange(i, j)
 
         return coord
-        
+
     def otherColorClick(self, i, j, old_i, old_j):
         new_square = self.board[i][j]
         old_square = self.board[old_i][old_j]
