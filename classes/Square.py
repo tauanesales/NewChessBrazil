@@ -35,6 +35,7 @@ class Square:
             return self.piece.image.draw()
 
     def pieceMoveList(self, board, rotation):  # retorna a lista de movimentos possíveis da peça (lista de tuplas)
+        
         return self.piece.moveList(board, rotation)
 
     def analyseMove(self, new_square, board, rotation):  # verificar se é possível mover através da lista
@@ -60,7 +61,8 @@ class Square:
         self.piece = None
         new_square.changeImageCoord()
         
-        gamestate.check = new_square.piece.isCheck(board)
-        
+        new_square.piece.isCheck(board,gamestate)
+        print(gamestate.check)
+
     def capturePiece(self, new_square, board):
         return self.piece.capture(new_square, board)
