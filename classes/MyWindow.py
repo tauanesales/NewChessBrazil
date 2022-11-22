@@ -77,10 +77,7 @@ class MyWindow(pyglet.window.Window):
                         self.gs.clicked = self.board.sameColorClick(*args, self.drag)
 
                     else:
-
-                        self.gs.clicked = self.board.otherColorClick(*args)
-
-                        self.gs.clicked = self.board.otherColorClick(*args,self.gs)
+                        self.gs.clicked = self.board.otherColorClick(*args, self.gs)
 
                     if self.gs.clicked == 1:
                         self.gs.shiftChange()
