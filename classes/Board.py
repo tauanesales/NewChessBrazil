@@ -196,7 +196,11 @@ class Board:
                 if square.returnPoint(x, y):
                     i, j = square.returnCoordinates(x, y)
 
-        return i, j
+        if i is None and j is None:
+            return TypeError('No squares were clicked.')
+
+        else:
+            return i, j
 
     def isSameColor(self, i, j, old_i, old_j):
         new_square = self.board[i][j]
