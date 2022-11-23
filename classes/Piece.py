@@ -31,12 +31,12 @@ class Piece(ABC):
         pass
     
     def validMoves(self,gamestate,board):
-        validMoves = self.moveList(board,board.rotation)
+        validMoves = self.moveList(board,board.board_rotation)
 
         # Vamos iterar sobre validMoves de tras para a frente retirando os movimentos não válidos
         for i in range(len(validMoves) -1,-1,-1):
             
-            # Agora iremos simular o movimento da peça, se isso permitir que o inimigo coloque o seu rei em xeque sem mover nenghuma peça não é um movimento válido
+            # Agora iremos simular o movimento da peça, se isso permitir que o inimigo coloque o seu rei em xeque sem mover nenhuma peça não é um movimento válido
 
             old_i = self.i
             old_j = self.j
@@ -47,6 +47,8 @@ class Piece(ABC):
             if gamestate.inCheck(board):
                 validMoves.remove(validMoves[i])
 
+            self.i = old_i
+            self.j = old_j
         return validMoves
 
     def isCheck(self, board, gamestate):

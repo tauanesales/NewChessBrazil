@@ -70,7 +70,7 @@ class Square:
         new_square.piece = self.piece
         self.piece = None
         new_square.changeImageCoord()
-
+        
         print(gamestate.inCheck(board))
         # new_square.piece.isCheck(board,gamestate)
         
