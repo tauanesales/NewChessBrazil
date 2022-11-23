@@ -6,11 +6,11 @@ from classes.Board import Board
 def main():
     width = height = 512
 
-    gs = ChessEngine.GameState()  # adicionando o gamestate ao jogo
+    board = Board(width, height)
+
+    gs = ChessEngine.GameState(board.board_rotation)  # adicionando o gamestate ao jogo
 
     running = True  # "rodar" o jogo
-
-    board = Board(width, height)
 
     window = MyWindow(width, height, board, running, gs)  # criação da janela
 

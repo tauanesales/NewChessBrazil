@@ -136,9 +136,9 @@ class Board:
             i, j = piece.i, piece.j
             self.board[i][j].piece = piece
 
-    def squareColorChange(self, i, j):  # mudança de cor no tabuleiro
+    def squareColorChange(self, i, j, gamestate):  # mudança de cor no tabuleiro
         actual_square = self.board[i][j]
-        moveList = actual_square.pieceMoveList(self, self.board_rotation)
+        moveList = actual_square.pieceMoveList(gamestate, self)
 
         if actual_square.status == 0:  # caso não esteja clicado
             actual_square.status = 1
@@ -170,19 +170,21 @@ class Board:
                 if square.color != square.o_color:
                     square.color = square.o_color
 
-    def pieceClick(self, x, y, shift):
+    def pieceClick(self, x, y, gamestate):
+        shift = gamestate.whiteToMove
+
         if shift:
             for piece in self.white_pieces:
                 i, j = piece.i, piece.j
                 if piece.returnPoint(x, y, self.square_size, self.square_size):
-                    self.squareColorChange(i, j)
+                    self.squareColorChange(i, j, gamestate)
                     return (i, j)
 
         else:
             for piece in self.black_pieces:
                 i, j = piece.i, piece.j
                 if piece.returnPoint(x, y, self.square_size, self.square_size):
-                    self.squareColorChange(i, j)
+                    self.squareColorChange(i, j, gamestate)
                     return (i, j)
 
         return 0
@@ -215,66 +217,68 @@ class Board:
         else:
             return False
 
-    def dragSquareSwitch(self, coord, clicked):
+    def dragSquareSwitch(self, coord, gamestate):
+        clicked = gamestate.clicked
+
         if type(coord) == type(clicked):
             (i, j) = coord
             (other_i, other_j) = clicked
-            self.squareColorChange(i, j)
+            self.squareColorChange(i, j, gamestate)
 
             if coord != clicked:
-                self.squareColorChange(other_i, other_j)
-                self.squareColorChange(i, j)
+                self.squareColorChange(other_i, other_j, gamestate)
+                self.squareColorChange(i, j, gamestate)
 
-    def noColorClick(self, i, j, old_i, old_j, gs):
+    def noColorClick(self, i, j, old_i, old_j, gamestate):
         new_square = self.board[i][j]
         old_square = self.board[old_i][old_j]
 
-        args = (new_square, self, self.board_rotation)
+        args = (new_square, gamestate, self)
 
-        self.squareColorChange(old_i, old_j)
+        self.squareColorChange(old_i, old_j, gamestate)
 
         if old_square.analyseMove(*args):
-            old_square.movePiece(new_square, self, gs)
+            old_square.movePiece(new_square, self, gamestate)
 
             return 1
 
         else:
             return 0
 
-    def samePieceClick(self, i, j, drag):
+    def samePieceClick(self, i, j, drag, gamestate):
         if drag == 0:
             coord = 0
 
         else:
-            self.squareColorChange(i, j)
+            self.squareColorChange(i, j, gamestate)
             coord = (i, j)
 
         return coord
 
-    def sameColorClick(self, i, j, old_i, old_j, drag):
+    def sameColorClick(self, i, j, old_i, old_j, drag, gamestate):
         new_square = self.board[i][j]
         old_square = self.board[old_i][old_j]
 
-        self.squareColorChange(old_i, old_j)
+        self.squareColorChange(old_i, old_j, gamestate)
 
         coord = (i, j)
 
         if new_square == old_square:
-            coord = self.samePieceClick(i, j, drag)
+            coord = self.samePieceClick(i, j, drag, gamestate)
 
         else:
-            self.squareColorChange(i, j)
+            self.squareColorChange(i, j, gamestate)
 
         return coord
 
-    def otherColorClick(self, i, j, old_i, old_j,gamestate):
+    def otherColorClick(self, i, j, old_i, old_j, gamestate):
 
         new_square = self.board[i][j]
         old_square = self.board[old_i][old_j]
 
-        args = (new_square, self, self.board_rotation)
+        args = (new_square, gamestate, self)
 
-        self.squareColorChange(old_i, old_j)
+        self.squareColorChange(old_i, old_j, gamestate)
 
         if old_square.analyseMove(*args):
             self.capturePiece(old_square, new_square)

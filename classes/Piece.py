@@ -27,99 +27,59 @@ class Piece(ABC):
         pass
 
     @abstractmethod
-    def moveList(self, board, rotation):
+    def moveList(self, board):
         pass
     
-    def validMoves(self,gamestate,board):
-        validMoves = self.moveList(board,board.board_rotation)
+    def validMoves(self, gamestate, board):
+        validMoves = self.moveList(board)
+        matrix = board.board
 
         # Vamos iterar sobre validMoves de tras para a frente retirando os movimentos não válidos
         for i in range(len(validMoves) -1,-1,-1):
-            
+            valid = validMoves[i]
+
             # Agora iremos simular o movimento da peça, se isso permitir que o inimigo coloque o seu rei em xeque sem mover nenhuma peça não é um movimento válido
+            temp = matrix[valid[0]][valid[1]].piece
 
-            old_i = self.i
-            old_j = self.j
+            if matrix[self.i][self.j].piece.ID == "K" and self.color == Color.WHITE:
+                gamestate.whiteKingPosition = (valid[0], valid[1])
 
-            self.i = validMoves[i][0]
-            self.j = validMoves[i][1]
+            elif matrix[self.i][self.j].piece.ID == "K" and self.color == Color.BLACK:
+                gamestate.blackKingPosition = (valid[0], valid[1])
+
+            if temp is not None:
+                if self.color == Color.WHITE:
+                    for piece in board.black_pieces:
+                        if piece is matrix[valid[0]][valid[1]].piece:
+                            board.black_pieces.remove(piece)
+
+                else:
+                    for piece in board.white_pieces:
+                        if piece is matrix[valid[0]][valid[1]].piece:
+                            board.white_pieces.remove(piece)
+
+            matrix[valid[0]][valid[1]].piece = matrix[self.i][self.j].piece
+            matrix[self.i][self.j].piece = None
 
             if gamestate.inCheck(board):
-                validMoves.remove(validMoves[i])
+                validMoves.remove(valid)
 
-            self.i = old_i
-            self.j = old_j
+            matrix[self.i][self.j].piece = matrix[valid[0]][valid[1]].piece
+            matrix[valid[0]][valid[1]].piece = temp
+
+            if matrix[self.i][self.j].piece.ID == "K" and self.color == Color.WHITE:
+                gamestate.whiteKingPosition = (self.i, self.j)
+
+            elif matrix[self.i][self.j].piece.ID == "K" and self.color == Color.BLACK:
+                gamestate.blackKingPosition = (self.i, self.j)
+
+            if temp is not None:
+                if self.color == Color.WHITE:
+                    board.black_pieces.append(temp)
+                else:
+                    board.white_pieces.append(temp)
+
         return validMoves
-
-    def isCheck(self, board, gamestate):
-        # possible_moves = self.moveList(board.board, board.board_rotation)
-        matrix = board.board
-        rotation = board.board_rotation
-        counter = 0
-        enemy_king = None
-        if gamestate.whiteToMove:
-            
-            for white_piece in board.white_pieces:
-               
-                for move in white_piece.moveList(board, rotation):
-                    i,j = move
-
-                    piece_in_square = matrix[i][j].piece
-                    if piece_in_square is not None:
-                        if piece_in_square.ID == King.ID and self.color != piece_in_square.color:
-                            check = True
-                            counter += 1
-
-
-                            enemy_king = piece_in_square
-                            print("check")
-                            # Se a peça no quadrado for o rei alteramos o atributo para representar q ele estar sendo atacado
-                            
-
-        else:
-             for black_piece in board.black_pieces:
-               
-                for move in black_piece.moveList(board, rotation):
-                    i, j = move
-                    piece_in_square = matrix[i][j].piece
-                    if piece_in_square is not None:
-                        if piece_in_square.ID == King.ID and self.color != piece_in_square.color:
-                            check = True
-                            counter += 1
-                            
-                            enemy_king = piece_in_square
-                            print("check")
-                            # Se a peça no quadrado for o rei alteramos o atributo para representar q ele estar sendo atacado           
-        
-        if counter == 0:
-            gamestate.check = False
-            gamestate.doubleCheck = False
-
-        elif counter == 1:
-
-            enemy_king.check = True
-            enemy_king.doubleCheck = False
-
-            gamestate.check = True
-            gamestate.doublecheck = False
-
-        elif counter == 2:
-
-            enemy_king.check = False
-            enemy_king.doubleCheck = True
-
-            gamestate.check = False
-            gamestate.doubleCheck = True
-            
-        else:
-            
-            enemy_king.check = False
-            enemy_king.doubleCheck = False
-
-            gamestate.check = False
-            gamestate.doubleCheck = False
-             
-
 
     def returnPoint(self, x, y, width, height):  # retorna True se for clicado na casa
         return (self.i * width) <= y < (self.i + 1) * width \
@@ -173,7 +133,7 @@ class Rook(Piece):
             if (i, j) == (new_square.i, new_square.j):
                 return True
 
-    def moveList(self, board, rotation):
+    def moveList(self, board):
         matrix = board.board
         movelist = []
         possible_move = [1, 1, 1, 1]  # [norte, leste, sul, oeste]
@@ -217,7 +177,7 @@ class Knight(Piece):
     def __init__(self, image, id, i, j):
         super().__init__(image, id, i, j)
     
-    def moveList(self, board, rotation):  # lista de movimentos
+    def moveList(self, board):  # lista de movimentos
         matrix = board.board
         moveList = []
         possible_indexes = [1, -1, 2, -2]  # lista para iteração
@@ -255,7 +215,7 @@ class Bishop(Piece):
             if (i, j) == (new_square.i, new_square.j):
                 return True
 
-    def moveList(self, board, rotation):
+    def moveList(self, board):
         matrix = board.board
         movelist = []
         possible_move = [1, 1, 1, 1]  # [1º quadrante, 2º quad, 3º quad, 4º quad]
@@ -306,10 +266,10 @@ class Queen(Piece):
             if (i, j) == (new_square.i, new_square.j):
                 return True
 
-    def moveList(self, board, rotation):
+    def moveList(self, board):
         movelist = []
-        movelist += Rook.moveList(self, board, rotation)
-        movelist += Bishop.moveList(self, board, rotation)
+        movelist += Rook.moveList(self, board)
+        movelist += Bishop.moveList(self, board)
         return movelist
 
 class King(Piece):
@@ -319,7 +279,7 @@ class King(Piece):
         self.check = False
         self.doubleCheck = False
 
-    def moveList(self, board, rotation):
+    def moveList(self, board):
         matrix = board.board
         kingMoves = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
         movelist = []
@@ -365,14 +325,13 @@ class Pawn(Piece):
 
                 return True
 
-    def moveList(self, board, rotation):
+    def moveList(self, board):
+        rotation = board.board_rotation
         matrix = board.board
         moveList = []
         direction = 0
 
         if self.color == Color.WHITE:
-
-            capture_moves = [(1, 1), (1, -1)]
 
             if self.already_moved:
                 possible_moves = [(1, 0)]
@@ -382,8 +341,6 @@ class Pawn(Piece):
 
         else:
 
-            capture_moves = [(-1, 1), (-1, -1)]
-
             if self.already_moved:
                 possible_moves = [(-1, 0)]
 
@@ -392,7 +349,6 @@ class Pawn(Piece):
 
         if rotation:
             possible_moves = [(-1*i[0], 0) for i in possible_moves]
-            capture_moves = [(-1*i[0], i[1]) for i in capture_moves]
 
         for move in possible_moves:
             if direction == 0:
@@ -407,6 +363,24 @@ class Pawn(Piece):
 
                 else:
                     direction = 1
+
+        moveList += self.captureList(board)
+
+        return moveList
+
+    def captureList(self, board):
+        moveList = []
+        matrix = board.board
+        rotation = board.board_rotation
+
+        if self.color == Color.WHITE:
+            capture_moves = [(1, 1), (1, -1)]
+
+        else:
+            capture_moves = [(-1, 1), (-1, -1)]
+
+        if rotation:
+            capture_moves = [(-1*i[0], i[1]) for i in capture_moves]
 
         for move in capture_moves:
             i_final = self.i + move[0]
