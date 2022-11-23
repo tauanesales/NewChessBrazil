@@ -56,7 +56,7 @@ class Square:
         return self.piece.canCapture(new_square)
 
     def movePiece(self, new_square, board, gamestate):  # mover a peça de casa, vincula-a a nova e desvincula da atual
-
+        
         self.piece.i = new_square.i
         self.piece.j = new_square.j
      
@@ -70,7 +70,7 @@ class Square:
         new_square.piece = self.piece
         self.piece = None
         new_square.changeImageCoord()
-        
+        new_square.piece.validMoves(gamestate,board)
         print(gamestate.inCheck(board))
         # new_square.piece.isCheck(board,gamestate)
         
