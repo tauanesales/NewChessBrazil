@@ -1,4 +1,5 @@
 from pyglet import graphics
+from classes.Colors import Color
 
 class Square:
     def __init__(self, square, i, j, width, height, piece=None):
@@ -55,14 +56,25 @@ class Square:
         return self.piece.canCapture(new_square)
 
     def movePiece(self, new_square, board, gamestate):  # mover a peça de casa, vincula-a a nova e desvincula da atual
+
         self.piece.i = new_square.i
         self.piece.j = new_square.j
+     
+        if self.piece.ID == "K" and self.piece.color == Color.WHITE:
+            gamestate.whiteKingPosition = (new_square.i,new_square.j)
+        
+        if self.piece.ID == "K" and self.piece.color == Color.BLACK:
+            gamestate.blackKingPosition = (new_square.i,new_square.j)
+
+
         new_square.piece = self.piece
         self.piece = None
         new_square.changeImageCoord()
+
+        print(gamestate.inCheck(board))
+        # new_square.piece.isCheck(board,gamestate)
         
-        new_square.piece.isCheck(board,gamestate)
-        print(gamestate.check)
+        
 
     def capturePiece(self, new_square, board):
         return self.piece.capture(new_square, board)

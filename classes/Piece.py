@@ -30,6 +30,25 @@ class Piece(ABC):
     def moveList(self, board, rotation):
         pass
     
+    def validMoves(self,gamestate,board):
+        validMoves = self.moveList(board,board.rotation)
+
+        # Vamos iterar sobre validMoves de tras para a frente retirando os movimentos não válidos
+        for i in range(len(validMoves) -1,-1,-1):
+            
+            # Agora iremos simular o movimento da peça, se isso permitir que o inimigo coloque o seu rei em xeque sem mover nenghuma peça não é um movimento válido
+
+            old_i = self.i
+            old_j = self.j
+
+            self.i = validMoves[i][0]
+            self.j = validMoves[i][1]
+
+            if gamestate.inCheck(board):
+                validMoves.remove(validMoves[i])
+
+        return validMoves
+
     def isCheck(self, board, gamestate):
         # possible_moves = self.moveList(board.board, board.board_rotation)
         matrix = board.board
@@ -320,31 +339,7 @@ class King(Piece):
             else:
                 pass
         
-        # for move in movelist:
-        #     if self.isAttacked(board,move):
-        #         movelist.remove(move)
-            
         return movelist
-
-    def isAttacked(self,board,position):
-        matrix = board.board
-        rotation = board.board_rotation
-        attacked = False
-        if self.color == Color.WHITE:
-            for black_piece in board.black_pieces:
-               
-                for move in black_piece.moveList(matrix, rotation):
-                    i,j = move
-                    if i == position[0] and j == position[1]:
-                        attacked = True
-        else:
-            for white_piece in board.white_pieces:
-               
-                for move in white_piece.moveList(matrix, rotation):
-                    i, j = move
-                    if i == position[0] and j == position[1]:
-                        attacked = True
-        return attacked
 
     def move(self, new_square, movelist):
         for i in movelist:
