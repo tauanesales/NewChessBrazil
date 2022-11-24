@@ -35,12 +35,11 @@ class Square:
         if self.piece is not None:
             return self.piece.image.draw()
 
-    def pieceMoveList(self, board, rotation):  # retorna a lista de movimentos possíveis da peça (lista de tuplas)
-        
-        return self.piece.moveList(board, rotation)
+    def pieceMoveList(self, gamestate, board):  # retorna a lista de movimentos possíveis da peça (lista de tuplas)
+        return self.piece.validMoves(gamestate, board)
 
-    def analyseMove(self, new_square, board, rotation):  # verificar se é possível mover através da lista
-        movelist = self.pieceMoveList(board, rotation)
+    def analyseMove(self, new_square, gamestate, board):  # verificar se é possível mover através da lista
+        movelist = self.pieceMoveList(gamestate, board)
         return self.piece.move(new_square, movelist)
 
     def changeImageCoord(self, xf = None, yf = None):  # mudar coords da imagem
@@ -66,15 +65,10 @@ class Square:
         if self.piece.ID == "K" and self.piece.color == Color.BLACK:
             gamestate.blackKingPosition = (new_square.i,new_square.j)
 
-
         new_square.piece = self.piece
         self.piece = None
         new_square.changeImageCoord()
         new_square.piece.validMoves(gamestate,board)
-        print(gamestate.inCheck(board))
-        # new_square.piece.isCheck(board,gamestate)
-        
-        
 
     def capturePiece(self, new_square, board):
         return self.piece.capture(new_square, board)
