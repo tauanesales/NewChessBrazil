@@ -61,14 +61,36 @@ class Square:
      
         if self.piece.ID == "K" and self.piece.color == Color.WHITE:
             gamestate.whiteKingPosition = (new_square.i,new_square.j)
-        
+            gamestate.currentCastlingRight.whiteKingSide = False
+            gamestate.currentCastlingRight.whiteQueenSide = False
+
         if self.piece.ID == "K" and self.piece.color == Color.BLACK:
             gamestate.blackKingPosition = (new_square.i,new_square.j)
+            gamestate.currentCastlingRight.blackKingSide = False
+            gamestate.currentCastlingRight.blackQueenSide = False
+
+
+        if self.piece.ID == "R" and self.piece.color == Color.WHITE and self.j == gamestate.whiteKingPosition[1] - 4:
+            gamestate.currentCastlingRight.whiteQueenSide = False
+
+        if self.piece.ID == "R" and self.piece.color == Color.WHITE and self.j == gamestate.whiteKingPosition[1] + 3:
+            gamestate.currentCastlingRight.whiteKingSide = False
+
+        if self.piece.ID == "R" and self.piece.color == Color.BLACK and self.j == gamestate.blackKingPosition[1] - 4:
+            gamestate.currentCastlingRight.blackQueenSide = False
+
+        if self.piece.ID == "R" and self.piece.color == Color.BLACK and self.j == gamestate.blackKingPosition[1] + 3:
+            gamestate.currentCastlingRight.blackKingSide = False
+        
 
         new_square.piece = self.piece
         self.piece = None
         new_square.changeImageCoord()
         new_square.piece.validMoves(gamestate,board)
+
+        if new_square.piece.ID == "p":
+            new_square.piece.promotePawn(board)
+    
 
     def capturePiece(self, new_square, board):
         return self.piece.capture(new_square, board)

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from classes.Colors import Color
-
+import pyglet
 
 class Piece(ABC):
     
@@ -128,6 +128,7 @@ class Rook(Piece):
     ID = "R"
     def __init__(self, image, id, i, j):
         super().__init__(image, id, i, j)
+        self.already_moved = False
 
     def move(self, new_square, movelist):  # verifica se na lista de movimentos é possível mover a peça à casa desejada
         for i in movelist:  # movelist = lista de tuplas, logo i = tupla
@@ -279,8 +280,7 @@ class King(Piece):
     ID = "K"
     def __init__(self, image, id, i, j):
         super().__init__(image, id, i, j)
-        self.check = False
-        self.doubleCheck = False
+        self.already_moved = False
 
     def moveList(self, board):
         matrix = board.board
@@ -305,6 +305,10 @@ class King(Piece):
                 pass
         
         return movelist
+    
+    def validMoves(self, gamestate, board):
+        return super().validMoves(gamestate, board) + []
+        
 
     def move(self, new_square, movelist):
         for i in movelist:
@@ -393,3 +397,62 @@ class Pawn(Piece):
                 moveList.append((i_final, j_final))
 
         return moveList
+
+    def checkPromotion(self, board):
+        
+        
+        if self.color == Color.WHITE:
+            if board.board_rotation:
+                
+                if self.i == 0:
+                    return True
+                else:
+                    return False
+            else:
+
+                if self.i == 7:
+                    return True
+                else:
+                    return False
+        else:
+
+            if board.board_rotation:
+
+                if self.i == 7:
+                    return True
+                else:
+                    return False
+            else:
+                if self.i == 0:
+                    return True
+                else:
+                    return False
+
+    def promotePawn(self,board):
+
+        if self.checkPromotion(board):
+            
+            if self.color == Color.WHITE:
+                
+                
+                pawnPromoted = board.addPiece(Queen,Color.WHITE,self.i,self.j)
+
+                for piece in board.white_pieces:
+                    if piece == self:
+                        board.white_pieces.remove(piece)
+                    
+                board.white_pieces.append(pawnPromoted)
+                board.board[self.i][self.j].piece = pawnPromoted
+
+                
+
+            else:
+                
+                pawnPromoted = board.addPiece(Queen,Color.BLACK,self.i,self.j)
+
+                for piece in board.black_pieces:
+                    if piece == self:
+                        board.black_pieces.remove(piece)
+                    
+                board.black_pieces.append(pawnPromoted)
+                board.board[self.i][self.j].piece = pawnPromoted

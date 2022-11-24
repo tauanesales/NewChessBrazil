@@ -56,7 +56,7 @@ class Board:
         sprite = pyglet.sprite.Sprite(self.images[id], x = self.square_size*j,
                                     y = self.square_size*i)
 
-
+        
         return piece(sprite, id, i, j)
 
     def createPieces(self):  # inserção das peças, contidas na casa

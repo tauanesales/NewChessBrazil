@@ -1,3 +1,5 @@
+from classes.CastlingRights import CastlingRights
+
 class GameState():
 
     def __init__(self, rotation):
@@ -13,6 +15,9 @@ class GameState():
             self.whiteKingPosition = (0, 4)
             self.blackKingPosition = (7, 4)
 
+        self.currentCastlingRight = CastlingRights(True,True,True,True)
+
+        
     def shiftChange(self):  # mudança de turno
         if self.whiteToMove == True:
             self.whiteToMove = False
