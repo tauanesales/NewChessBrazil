@@ -7,7 +7,7 @@ class GameState():
         self.whiteKingPosition = (7,4)
         self.blackKingPosition = (0,4)
         self.checkMate = False # quando o rei não possui movimentos válidos e está em xeque
-        self.staleMate = False # quanod não há movimentos válidos e o rei não está em xeque
+        self.staleMate = False # quando não há movimentos válidos e o rei não está em xeque
 
     def shiftChange(self):  # mudança de turno
         if self.whiteToMove == True:

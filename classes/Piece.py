@@ -44,6 +44,9 @@ class Piece(ABC):
             self.i = validMoves[i][0]
             self.j = validMoves[i][1]
 
+            # if board.board[validMoves[i][0]][validMoves[i][1]].square.piece != None:
+
+
             if gamestate.inCheck(board):
                 validMoves.remove(validMoves[i])
 
