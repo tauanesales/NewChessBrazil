@@ -1,4 +1,6 @@
 from classes.CastlingRights import CastlingRights
+from classes.Piece import King,Rook
+from classes.Colors import Color
 
 class GameState():
 
@@ -99,3 +101,120 @@ class GameState():
             self.staleMate = False
 
         return allValidMoves
+
+    def getCastleMoves(self,board):
+
+        return self.inCheck(board)
+    
+    def getKingSideCastleMoves(self,board):
+        """"
+            Realiza o movimento do rei e da torre no roque a direita
+        """
+
+        if self.whiteToMove:
+
+            if self.currentCastlingRight.whiteKingSide:
+                row = self.whiteKingPosition[0]
+                col1 = self.whiteKingPosition[1] + 1
+                col2 = self.whiteKingPosition[1] + 2
+
+                whiteKing = board.board[row][self.whiteKingPosition[1]].piece
+                whiteRightRook = board.boar[row][7].piece
+
+                if self.squareUnderAttack(row,col1, board) == False and  self.squareUnderAttack(row,col2, board) == False and board[row][col1].piece == None and board[row][col2].piece == None:
+                    
+                    # Movimento do rei no roque
+                    kingCastled = board.addPiece(King,Color.WHITE,row, col2)
+                    board.white_pieces.remove(whiteKing)
+                    board.white_pieces.append(kingCastled)
+                    board.board[row][col2].piece = kingCastled
+
+                    # Movimento da torre no roque    
+                    rookCastled = board.addPiece(Rook,Color.WHITE,row, 5)
+                    board.white_pieces.remove(whiteRightRook)
+                    board.white_pieces.append(rookCastled)
+                    board.board[row][5].piece = rookCastled
+        
+        else:
+
+            if self.currentCastlingRight.blackKingSide:
+                row = self.blackKingPosition[0]
+                col1 = self.blackKingPosition[1] + 1
+                col2 = self.blackKingPosition[1] + 2
+
+                blackKing = board.board[row][self.blackKingPosition[1]].piece
+                blackRightRook = board.boar[row][7].piece
+
+                if self.squareUnderAttack(row,col1, board) == False and  self.squareUnderAttack(row,col2, board) == False and board[row][col1].piece == None and board[row][col2].piece == None:
+                    # Movimento do rei no roque
+                    kingCastled = board.addPiece(King,Color.BLACK,row, col2)
+                    board.black_pieces.remove(blackKing)
+                    board.black_pieces.append(kingCastled)
+                    board.board[row][col2].piece = kingCastled
+
+                    # Movimento da torre no roque    
+                    rookCastled = board.addPiece(Rook,Color.BLACK,row, 5)
+                    board.black_pieces.remove(blackRightRook)
+                    board.black_pieces.append(rookCastled)
+                    board.board[row][5].piece = rookCastled
+                    
+
+    
+    def getQueenSideCastleMoves(self,board):
+        """"
+            Realiza o movimento do rei e da torre no roque a esquerda
+        """
+
+        if self.whiteToMove:
+
+            if self.currentCastlingRight.whiteQueenSide:
+        
+                row = self.whiteKingPosition[0]
+                col1 = self.whiteKingPosition[1] - 1
+                col2 = self.whiteKingPosition[1] - 2
+
+                whiteKing = board.board[row][self.whiteKingPosition[1]].piece
+                whiteLeftRook = board.boar[row][0].piece
+
+                if self.squareUnderAttack(row,col1, board) == False and  self.squareUnderAttack(row,col2, board) == False and board[row][col1].piece == None and board[row][col2].piece == None:
+                    
+                    # Movimento do rei no roque
+                    kingCastled = board.addPiece(King,Color.WHITE,row, col2)
+                    board.white_pieces.remove(whiteKing)
+                    board.white_pieces.append(kingCastled)
+                    board.board[row][col2].piece = kingCastled
+
+                    # Movimento da torre no roque    
+                    rookCastled = board.addPiece(Rook,Color.WHITE,row, 3)
+                    board.white_pieces.remove(whiteLeftRook)
+                    board.white_pieces.append(rookCastled)
+                    board.board[row][3].piece = rookCastled
+                    
+                        
+        
+        else:
+
+            if self.currentCastlingRight.blackQueenSide:
+                row = self.blackKingPosition[0]
+                col1 = self.blackKingPosition[1] - 1
+                col2 = self.blackKingPosition[1] - 2
+
+                blackKing = board.board[row][self.blackKingPosition[1]].piece
+                blackLeftRook = board.boar[row][0].piece
+
+                if self.squareUnderAttack(row,col1, board) == False and  self.squareUnderAttack(row,col2, board) == False and board[row][col1].piece == None and board[row][col2].piece == None:
+                    
+                    # Movimento do rei no roque
+                    kingCastled = board.addPiece(King,Color.BLACK,row, col2)
+                    board.black_pieces.remove(blackKing)
+                    board.black_pieces.append(kingCastled)
+                    board.board[row][col2].piece = kingCastled
+
+                    # Movimento da torre no roque    
+                    rookCastled = board.addPiece(Rook,Color.BLACK,row, 3)
+                    board.black_pieces.remove(blackLeftRook)
+                    board.black_pieces.append(rookCastled)
+                    board.board[row][3].piece = rookCastled
+    
+
+            

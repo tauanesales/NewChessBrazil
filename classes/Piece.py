@@ -432,6 +432,8 @@ class Pawn(Piece):
 
         if self.checkPromotion(board):
             
+            # self.showPromotionMenu(board)
+
             if self.color == Color.WHITE:
                 
                 
@@ -456,3 +458,40 @@ class Pawn(Piece):
                     
                 board.black_pieces.append(pawnPromoted)
                 board.board[self.i][self.j].piece = pawnPromoted
+
+    def showPromotionMenu(self,board):
+        window = pyglet.window.Window()
+        ids =["B","N","Q","R"]
+        images = {}
+        i = 0
+        distance = 50
+        height = 50
+        if self.color == Color.WHITE and self.checkPromotion(board):
+
+            for id in ids:
+                piece = "w" + id
+                images[piece] = pyglet.image.load("public/" + piece + ".png")
+                
+                images[piece] = pyglet.sprite.Sprite(images[piece], x = i * distance,y = height )
+
+                i += 1
+        elif self.color == Color.BLACK and self.checkPromotion(board):
+            for id in ids:
+                piece = "b" + id
+                images[piece] = pyglet.image.load("public/" + piece + ".png")
+
+                images[piece] = pyglet.sprite.Sprite(images[piece], x = i * distance,y = height )
+                print(images[piece])
+
+                i += 1
+        
+        @window.event
+        def on_draw():
+            window.clear()
+
+            for piece in images:
+                images[piece].draw()
+
+
+
+        

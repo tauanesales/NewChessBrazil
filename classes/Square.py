@@ -53,19 +53,15 @@ class Square:
 
     def analyseCapture(self, new_square):  # verificar captura (útil quando implantar xeques)
         return self.piece.canCapture(new_square)
-
-    def movePiece(self, new_square, board, gamestate):  # mover a peça de casa, vincula-a a nova e desvincula da atual
+    
+    def updateCastlingRights(self,gamestate):
         
-        self.piece.i = new_square.i
-        self.piece.j = new_square.j
-     
         if self.piece.ID == "K" and self.piece.color == Color.WHITE:
-            gamestate.whiteKingPosition = (new_square.i,new_square.j)
+
             gamestate.currentCastlingRight.whiteKingSide = False
             gamestate.currentCastlingRight.whiteQueenSide = False
 
         if self.piece.ID == "K" and self.piece.color == Color.BLACK:
-            gamestate.blackKingPosition = (new_square.i,new_square.j)
             gamestate.currentCastlingRight.blackKingSide = False
             gamestate.currentCastlingRight.blackQueenSide = False
 
@@ -81,7 +77,21 @@ class Square:
 
         if self.piece.ID == "R" and self.piece.color == Color.BLACK and self.j == gamestate.blackKingPosition[1] + 3:
             gamestate.currentCastlingRight.blackKingSide = False
+
+
+    def movePiece(self, new_square, board, gamestate):  # mover a peça de casa, vincula-a a nova e desvincula da atual
         
+        self.piece.i = new_square.i
+        self.piece.j = new_square.j
+     
+        if self.piece.ID == "K" and self.piece.color == Color.WHITE:
+            gamestate.whiteKingPosition = (new_square.i,new_square.j)
+       
+
+        if self.piece.ID == "K" and self.piece.color == Color.BLACK:
+            gamestate.blackKingPosition = (new_square.i,new_square.j)
+
+        self.updateCastlingRights(gamestate)
 
         new_square.piece = self.piece
         self.piece = None
