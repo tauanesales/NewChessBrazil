@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from classes.Colors import Color
 import pyglet
 
+
 class Piece(ABC):
     
     def __init__(self, image, id, i, j):
@@ -306,9 +307,45 @@ class King(Piece):
         
         return movelist
     
-    def validMoves(self, gamestate, board):
-        return super().validMoves(gamestate, board) + []
+
+    def verifyCastlePieces(self,board,direction):
+
+        canCastle = True
+
+        if direction == "right":
+            for col in range(5,7):
+                
+                if self.there_is_piece_between(self.i,col,board.board) == 1 or self.there_is_piece_between(self.i,col,board.board) == 2 :
+                    canCastle = False
+                
+        else:
+
+            for col in range(1,4):
+                if self.there_is_piece_between(self.i,col,board.board) == 1 or self.there_is_piece_between(self.i,col,board.board) == 2 :
+                    canCastle = False
         
+        return canCastle
+
+    def validMoves(self, gamestate, board):
+        castleMoves = []
+        
+        if self.color == Color.WHITE:
+
+            if gamestate.currentCastlingRight.whiteKingSide and self.verifyCastlePieces(board,direction="right"):
+                castleMoves += [(self.i,2 + self.j)]
+                
+            if gamestate.currentCastlingRight.whiteQueenSide and self.verifyCastlePieces(board, direction="left"):
+                castleMoves += [(self.i, self.j - 2)]
+   
+        else:
+            if gamestate.currentCastlingRight.blackKingSide and self.verifyCastlePieces(board, direction = "right"):
+                castleMoves += [(self.i, self.j + 2)]
+
+            if gamestate.currentCastlingRight.blackQueenSide and self.verifyCastlePieces(board, direction = "left"):
+                castleMoves += [(self.i, self.j - 2)]
+            
+            
+        return super().validMoves(gamestate,board) + castleMoves
 
     def move(self, new_square, movelist):
         for i in movelist:
@@ -432,7 +469,7 @@ class Pawn(Piece):
 
         if self.checkPromotion(board):
             
-            # self.showPromotionMenu(board)
+            self.showPromotionMenu(board)
 
             if self.color == Color.WHITE:
                 
@@ -460,12 +497,12 @@ class Pawn(Piece):
                 board.board[self.i][self.j].piece = pawnPromoted
 
     def showPromotionMenu(self,board):
-        window = pyglet.window.Window()
         ids =["B","N","Q","R"]
         images = {}
         i = 0
         distance = 50
         height = 50
+        window = pyglet.window.Window(width = distance*4, height = height)
         if self.color == Color.WHITE and self.checkPromotion(board):
 
             for id in ids:
@@ -492,6 +529,26 @@ class Pawn(Piece):
             for piece in images:
                 images[piece].draw()
 
+        @window.event
+        def on_mouse_release(x, y, buttons, modifiers):
+            if 0 <= x <= distance*1:
+                # faz algo
+                pass
 
+            elif distance*1 < x <= distance*2:
+                #
+                pass
+            
+            elif distance*2 < x <= distance*3:
+                #
+                pass
+            
+            else:
+                #
+                pass
+
+            window.close()
+
+            
 
         

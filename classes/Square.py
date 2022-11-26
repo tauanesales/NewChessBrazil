@@ -78,29 +78,36 @@ class Square:
         if self.piece.ID == "R" and self.piece.color == Color.BLACK and self.j == gamestate.blackKingPosition[1] + 3:
             gamestate.currentCastlingRight.blackKingSide = False
 
-
+    
     def movePiece(self, new_square, board, gamestate):  # mover a peça de casa, vincula-a a nova e desvincula da atual
         
-        self.piece.i = new_square.i
-        self.piece.j = new_square.j
-     
-        if self.piece.ID == "K" and self.piece.color == Color.WHITE:
-            gamestate.whiteKingPosition = (new_square.i,new_square.j)
-       
+        if self.piece.ID == "K" and new_square.j - self.piece.j  == 2:
+            gamestate.getKingSideCastleMoves(board)
 
-        if self.piece.ID == "K" and self.piece.color == Color.BLACK:
-            gamestate.blackKingPosition = (new_square.i,new_square.j)
+        elif self.piece.ID == "K" and self.piece.j - new_square.j  == 2:
+            gamestate.getQueenSideCastleMoves(board)
+        else:
+        
+            self.piece.i = new_square.i
+            self.piece.j = new_square.j
+        
+            if self.piece.ID == "K" and self.piece.color == Color.WHITE:
+                gamestate.whiteKingPosition = (new_square.i,new_square.j)
+        
 
-        self.updateCastlingRights(gamestate)
+            if self.piece.ID == "K" and self.piece.color == Color.BLACK:
+                gamestate.blackKingPosition = (new_square.i,new_square.j)
 
-        new_square.piece = self.piece
-        self.piece = None
-        new_square.changeImageCoord()
-        new_square.piece.validMoves(gamestate,board)
+            self.updateCastlingRights(gamestate)
 
-        if new_square.piece.ID == "p":
-            new_square.piece.promotePawn(board)
-    
+            new_square.piece = self.piece
+            self.piece = None
+            new_square.changeImageCoord()
+            new_square.piece.validMoves(gamestate,board)
+
+            if new_square.piece.ID == "p":
+                new_square.piece.promotePawn(board)
+        
 
     def capturePiece(self, new_square, board):
         return self.piece.capture(new_square, board)
