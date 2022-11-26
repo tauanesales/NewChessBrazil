@@ -308,20 +308,20 @@ class King(Piece):
         return movelist
     
 
-    def verifyCastlePieces(self,board,direction):
+    def verifyCastlePieces(self,board,gamestate,direction):
 
         canCastle = True
 
         if direction == "right":
             for col in range(5,7):
                 
-                if self.there_is_piece_between(self.i,col,board.board) == 1 or self.there_is_piece_between(self.i,col,board.board) == 2 :
+                if self.there_is_piece_between(self.i,col,board.board) == 1 or self.there_is_piece_between(self.i,col,board.board) == 2 or gamestate.squareUnderAttack(self.i,col,board) :
                     canCastle = False
                 
         else:
 
             for col in range(1,4):
-                if self.there_is_piece_between(self.i,col,board.board) == 1 or self.there_is_piece_between(self.i,col,board.board) == 2 :
+                if self.there_is_piece_between(self.i,col,board.board) == 1 or self.there_is_piece_between(self.i,col,board.board) == 2 or gamestate.squareUnderAttack(self.i,col,board):
                     canCastle = False
         
         return canCastle
@@ -331,17 +331,17 @@ class King(Piece):
         
         if self.color == Color.WHITE:
 
-            if gamestate.currentCastlingRight.whiteKingSide and self.verifyCastlePieces(board,direction="right"):
+            if gamestate.currentCastlingRight.whiteKingSide and self.verifyCastlePieces(board,gamestate,direction="right"):
                 castleMoves += [(self.i,2 + self.j)]
                 
-            if gamestate.currentCastlingRight.whiteQueenSide and self.verifyCastlePieces(board, direction="left"):
+            if gamestate.currentCastlingRight.whiteQueenSide and self.verifyCastlePieces(board,gamestate,direction="left"):
                 castleMoves += [(self.i, self.j - 2)]
    
         else:
-            if gamestate.currentCastlingRight.blackKingSide and self.verifyCastlePieces(board, direction = "right"):
+            if gamestate.currentCastlingRight.blackKingSide and self.verifyCastlePieces(board, gamestate,direction = "right"):
                 castleMoves += [(self.i, self.j + 2)]
 
-            if gamestate.currentCastlingRight.blackQueenSide and self.verifyCastlePieces(board, direction = "left"):
+            if gamestate.currentCastlingRight.blackQueenSide and self.verifyCastlePieces(board, gamestate,direction = "left"):
                 castleMoves += [(self.i, self.j - 2)]
             
             

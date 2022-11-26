@@ -84,3 +84,6 @@ class MyWindow(pyglet.window.Window):
 
             if self.drag == 1:
                 self.drag = 0
+
+            if self.gs.checkMate:
+                self.running = False
