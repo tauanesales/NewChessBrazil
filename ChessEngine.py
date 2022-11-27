@@ -51,11 +51,12 @@ class GameState():
     def staleMate(self, other):
         self._staleMate = other
 
-    def shiftChange(self):  # mudança de turno
+    def shiftChange(self, board):  # mudança de turno
         if self.whiteToMove == True:
             self.whiteToMove = False
         else:
             self.whiteToMove = True
+        self.getAllValidMoves(board)
 
     def getAllEnemyPossibleMoves(self, board):
         moves = []
@@ -115,16 +116,17 @@ class GameState():
         if self.whiteToMove:
 
             for white_piece in board.white_pieces:
-                allValidMoves.append(white_piece.validMoves())
+                allValidMoves += white_piece.validMoves(self, board)
 
         else:
             for black_piece in board.black_pieces:
-                allValidMoves.append(black_piece.validMoves())
+                allValidMoves += black_piece.validMoves(self, board)
 
         if len(allValidMoves) == 0:
 
             if self.inCheck(board):
                 self.checkMate = True
+
             else:
                 self.staleMate = True
         else:

@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from classes.Colors import Color
 import pyglet
-from time import sleep
 
 
 class Piece(ABC):
