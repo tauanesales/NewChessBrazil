@@ -105,21 +105,21 @@ class GameState():
         else:
             return self.squareUnderAttack(self.blackKingPosition[0],self.blackKingPosition[1],board)
 
-    def getAllValidMoves(self, board):
+    def getAllEnemyValidMoves(self, board):
         """
-            retorna todos os movimentos válidos do jogador da rodada
+            retorna todos os movimentos válidos do jogador oponente
             OBS: se len(allValidMoves) == 0 temos um xequemate ou stalemate
         """
         allValidMoves = []
 
         if self.whiteToMove:
 
-            for white_piece in board.white_pieces:
-                allValidMoves.append(white_piece.validMoves())
+            for black_piece in board.black_pieces:
+                allValidMoves.append(black_piece.validMoves(self,board))
 
         else:
-            for black_piece in board.black_pieces:
-                allValidMoves.append(black_piece.validMoves())
+            for white_piece in board.white_pieces:
+                allValidMoves.append(white_piece.validMoves(self,board))
 
         if len(allValidMoves) == 0:
 

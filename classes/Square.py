@@ -107,7 +107,9 @@ class Square:
 
             if new_square.piece.ID == "p":
                 new_square.piece.promotePawn(board)
-        
+
+        gamestate.getAllEnemyValidMoves(board)
+        print(gamestate.checkMate)
 
     def capturePiece(self, new_square, board):
         return self.piece.capture(new_square, board)

@@ -1,5 +1,6 @@
 import pyglet
 from StartMenu import StartMenu
+from CheckMateMenu import CheckMateMenu
 
 class MyWindow(pyglet.window.Window):
 
@@ -16,6 +17,7 @@ class MyWindow(pyglet.window.Window):
         self.delta_y = 0
         self.window = window
         self.startMenu = StartMenu(width, height, "New Chess Brazil")
+        self.checkmateMenu = CheckMateMenu(width,height)
 
     def boardSquare(self, i, j):
         return self.board.board[i][j]
@@ -25,10 +27,13 @@ class MyWindow(pyglet.window.Window):
 
     def on_draw(self):
         self.clear()
-        if self.window == "game":
-            self.on_draw_game_menu()
-        elif self.window == "start":
-            self.startMenu.on_draw()
+        if self.gs.checkMate:
+            self.checkmateMenu.on_draw()
+        else:
+            if self.window == "game":
+                self.on_draw_game_menu()
+            elif self.window == "start":
+                self.startMenu.on_draw()
 
     
 
