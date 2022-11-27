@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from classes.Colors import Color
 import pyglet
+from time import sleep
 
 
 class Piece(ABC):
@@ -469,12 +470,12 @@ class Pawn(Piece):
 
         if self.checkPromotion(board):
             
-            self.showPromotionMenu(board)
+            chosen = self.showPromotionMenu(board)
 
             if self.color == Color.WHITE:
                 
                 
-                pawnPromoted = board.addPiece(Queen,Color.WHITE,self.i,self.j)
+                pawnPromoted = board.addPiece(chosen ,Color.WHITE,self.i,self.j)
 
                 for piece in board.white_pieces:
                     if piece == self:
@@ -483,11 +484,9 @@ class Pawn(Piece):
                 board.white_pieces.append(pawnPromoted)
                 board.board[self.i][self.j].piece = pawnPromoted
 
-                
-
             else:
                 
-                pawnPromoted = board.addPiece(Queen,Color.BLACK,self.i,self.j)
+                pawnPromoted = board.addPiece(chosen, Color.BLACK,self.i,self.j)
 
                 for piece in board.black_pieces:
                     if piece == self:
@@ -499,9 +498,10 @@ class Pawn(Piece):
     def showPromotionMenu(self,board):
         ids =["B","N","Q","R"]
         images = {}
+        chosen = None
         i = 0
-        distance = 50
-        height = 50
+        distance = 64
+        height = 64
         window = pyglet.window.Window(width = distance*4, height = height)
         if self.color == Color.WHITE and self.checkPromotion(board):
 
@@ -509,7 +509,7 @@ class Pawn(Piece):
                 piece = "w" + id
                 images[piece] = pyglet.image.load("public/" + piece + ".png")
                 
-                images[piece] = pyglet.sprite.Sprite(images[piece], x = i * distance,y = height )
+                images[piece] = pyglet.sprite.Sprite(images[piece], x = i * distance, y = 0)
 
                 i += 1
         elif self.color == Color.BLACK and self.checkPromotion(board):
@@ -517,11 +517,10 @@ class Pawn(Piece):
                 piece = "b" + id
                 images[piece] = pyglet.image.load("public/" + piece + ".png")
 
-                images[piece] = pyglet.sprite.Sprite(images[piece], x = i * distance,y = height )
-                print(images[piece])
+                images[piece] = pyglet.sprite.Sprite(images[piece], x = i * distance, y = 0)
 
                 i += 1
-        
+
         @window.event
         def on_draw():
             window.clear()
@@ -532,23 +531,20 @@ class Pawn(Piece):
         @window.event
         def on_mouse_release(x, y, buttons, modifiers):
             if 0 <= x <= distance*1:
-                # faz algo
-                pass
+                chosen = Bishop
 
             elif distance*1 < x <= distance*2:
-                #
-                pass
+                chosen = Knight
             
             elif distance*2 < x <= distance*3:
-                #
-                pass
+                chosen = Queen
             
             else:
-                #
-                pass
+                chosen = Rook
 
             window.close()
 
+        return chosen
             
 
         
