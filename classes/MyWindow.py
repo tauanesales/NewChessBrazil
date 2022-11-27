@@ -1,8 +1,8 @@
 import pyglet
 from StartMenu import StartMenu
+from EndGameMenu import EndGameMenu
 from classes.Square import Square
 from typing import Any
-from CheckMateMenu import CheckMateMenu
 
 
 class MyWindow(pyglet.window.Window):
@@ -20,9 +20,7 @@ class MyWindow(pyglet.window.Window):
         self.delta_y = 0
         self.window = window
         self.startMenu = StartMenu(width, height, "New Chess Brazil")
-        self.checkmateMenu = CheckMateMenu(width,height)
-
-
+        self.endGameMenu = EndGameMenu(width, height, is_checkmate=True)
 
     def boardSquare(self, i: int, j: int) -> Square:
         return self.board.board[i][j]
@@ -32,60 +30,62 @@ class MyWindow(pyglet.window.Window):
 
     def on_draw(self) -> None:
         self.clear()
-        if self.gs.checkMate:
-            self.checkmateMenu.on_draw()
-        
-        else:
-            if self.window == "game":
-                self.on_draw_game_menu()
-            elif self.window == "start":
-                self.startMenu.on_draw()
+        if self.window == "game":
+            self.on_draw_game_menu()
+        elif self.window == "start":
+            self.startMenu.on_draw()
+        elif self.window == "end-game":
+            self.endGameMenu.on_draw()
 
-    def on_draw_game_menu(self) -> None:
+    def on_draw_game_menu(self):
         if self.running:
-            
+
             self.batch.draw()  # desenhar batches devido ao alto número de shapes
 
             for line in self.board.board:  # desenhar as peças normalmente
                 for square in line:
                     square.drawPiece()
-                
+
     def on_mouse_press(self, x: int, y: int, button: Any, modifiers: Any) -> None:
         if self.window == "game":
             self.on_mouse_press_game_window(x, y, button, modifiers)
 
-    def on_mouse_press_game_window(self,x: int, y: int, button: Any, modifiers: Any) -> None:
+    def on_mouse_press_game_window(self, x: int, y: int, button: Any, modifiers: Any) -> None:
         self.click_x = x
         self.click_y = y
-    
+
     def on_mouse_drag(self, x: int, y: int, dx: int, dy: int, buttons: Any, modifiers: Any) -> None:
         if self.window == "game":
             self.on_mouse_drag_game_window(x, y, dx, dy, buttons, modifiers)
 
-    def on_mouse_drag_game_window(self, x: int, y: int, dx: int, dy:int, buttons: Any, modifiers: Any) -> None:
+    def on_mouse_drag_game_window(self, x: int, y: int, dx: int, dy: int, buttons: Any, modifiers: Any) -> None:
         if pyglet.window.mouse.LEFT:
 
             if self.drag_circle(x, y, 5) and self.drag == 0:
-                coord = self.board.pieceClick(self.click_x, self.click_y, self.gs)
+                coord = self.board.pieceClick(
+                    self.click_x, self.click_y, self.gs)
 
                 if type(coord) == tuple:
                     (i, j) = coord
                     yi, xi = self.board.returnSquareXY(i, j)
-                    self.delta_x, self.delta_y = x - xi, y -yi
+                    self.delta_x, self.delta_y = x - xi, y - yi
                     self.board.dragSquareSwitch(coord, self.gs)
                     self.gs.clicked = coord
                     self.drag = 1
 
             elif self.drag == 1:
                 i, j = self.board.squareClick(self.click_x, self.click_y)
-                self.boardSquare(i, j).changeImageCoord(x - self.delta_x, y - self.delta_y)
+                self.boardSquare(i, j).changeImageCoord(
+                    x - self.delta_x, y - self.delta_y)
 
     def on_mouse_release(self, x: int, y: int, button: Any, modifiers: Any) -> None:
         if self.window == "game":
             self.on_mouse_release_game_window(x, y, button, modifiers)
         elif self.window == "start":
-            self.window = self.startMenu.on_mouse_release(x, y, button, modifiers)
-        
+            self.window = self.startMenu.on_mouse_release(
+                x, y, button, modifiers)
+        elif self.window == "end-game":
+            self.window = self.endGameMenu.on_mouse_release(x, y)
 
     def on_mouse_release_game_window(self, x: int, y: int, button: Any, modifiers: Any) -> None:
         if pyglet.window.mouse.LEFT:
@@ -106,13 +106,16 @@ class MyWindow(pyglet.window.Window):
                     args = (i, j, old_i, old_j)
 
                     if self.board.isSameColor(*args) is None:
-                        self.gs.clicked = self.board.noColorClick(*args, self.gs)
+                        self.gs.clicked = self.board.noColorClick(
+                            *args, self.gs)
 
                     elif self.board.isSameColor(*args) == True:
-                        self.gs.clicked = self.board.sameColorClick(*args, self.drag, self.gs)
+                        self.gs.clicked = self.board.sameColorClick(
+                            *args, self.drag, self.gs)
 
                     else:
-                        self.gs.clicked = self.board.otherColorClick(*args, self.gs)
+                        self.gs.clicked = self.board.otherColorClick(
+                            *args, self.gs)
 
                     if self.gs.clicked == 1:
                         self.gs.shiftChange(self.board)
