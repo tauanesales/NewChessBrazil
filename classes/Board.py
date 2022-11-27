@@ -3,38 +3,39 @@ from classes.Square import Square
 from classes.Piece import *
 from classes.Colors import *
 from random import choice
+from typing import Any, Union, Optional, Type
 
 
 class Board:
 
-    def __init__(self, width, height):
-        self.board = []
-        self.white_pieces = []
-        self.black_pieces = []
+    def __init__(self, width: int, height: int) -> None:
+        self.board: list[list[Square]] = []
+        self.white_pieces: list[Union[Rook, Knight, Bishop, Queen, King, Pawn]] = []
+        self.black_pieces: list[Union[Rook, Knight, Bishop, Queen, King, Pawn]] = []
         self.width = width
         self.height = height
         self.dimension = 8  # tabuleiro 8x8
-        self.images = {}  # dict de sprites das peças
+        self.images: dict[str, Any] = {}  # dict de sprites das peças
         self.batch = pyglet.graphics.Batch()  # batch para renderizar com mais eficiência
-        self.sprites = []  # lista dos shapes da casa para renderização (batch)
-        self.board_rotation = choice([False, True])
+        self.sprites: list[Any] = []  # lista dos shapes da casa para renderização (batch)
+        self.board_rotation: bool = choice([False, True])
 
         self.loadImages()
         self.createPieces()
 
     @property
-    def square_size(self):
+    def square_size(self) -> int:
         return self.height // self.dimension
 
-    def loadImages(self):
+    def loadImages(self) -> None:
         pieces = ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR", "bp",
                   "wp", "wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]
 
         for piece in pieces:
             self.images[piece] = pyglet.image.load("public/" + piece + ".png")
 
-    def createBoard(self):  # criação do tabuleiro
-        colors = [(255, 255, 255), (128, 128, 128)]  # cor branca e cinza, alternância
+    def createBoard(self) -> None:  # criação do tabuleiro
+        colors = [sColor.WHITE.value, sColor.GRAY.value]  # cor branca e cinza, alternância
 
         for i in range(self.dimension):
             line = []
@@ -51,7 +52,8 @@ class Board:
             self.board.append(line)
 
 
-    def addPiece(self, piece, color, i, j):
+    def addPiece(self, piece: Union[Type[Rook], Type[Knight], Type[Bishop], Type[Queen],
+                                    Type[King], Type[Pawn]], color: Any, i: int, j: int) -> Any:
         id = color.value + piece.ID
         sprite = pyglet.sprite.Sprite(self.images[id], x = self.square_size*j,
                                     y = self.square_size*i)
@@ -59,7 +61,7 @@ class Board:
         
         return piece(sprite, id, i, j)
 
-    def createPieces(self):  # inserção das peças, contidas na casa
+    def createPieces(self) -> None:  # inserção das peças, contidas na casa
 
         self.createBoard()
         pieces = []
@@ -136,7 +138,7 @@ class Board:
             i, j = piece.i, piece.j
             self.board[i][j].piece = piece
 
-    def squareColorChange(self, i, j, gamestate):  # mudança de cor no tabuleiro
+    def squareColorChange(self, i: int, j: int, gamestate: Any) -> None: 
         actual_square = self.board[i][j]
         moveList = actual_square.pieceMoveList(gamestate, self)
 
@@ -144,33 +146,34 @@ class Board:
             actual_square.status = 1
             actual_square.color = sColor.CLICKED.value
 
-            for coord in moveList:  # mudar a cor das casas que a peça pode mover
-                (old_i, old_j) = coord
-                other_square = self.board[old_i][old_j]
+            if moveList is not None:
+                for coord in moveList:  # mudar a cor das casas que a peça pode mover
+                    (old_i, old_j) = coord
+                    other_square = self.board[old_i][old_j]
 
-                if actual_square.analyseCapture(other_square):  # caso haja alguma peça capturável
-                    other_square.color = sColor.CAPTURE.value
-
-                else:
-                    if other_square.o_color == sColor.WHITE.value:
-                        other_square.color = sColor.MOVEMENT.value
+                    if actual_square.analyseCapture(other_square):  # caso haja alguma peça capturável
+                        other_square.color = sColor.CAPTURE.value
 
                     else:
-                        other_square.color = sColor.MOVEMENT2.value
+                        if other_square.o_color == sColor.WHITE.value:
+                            other_square.color = sColor.MOVEMENT.value
+
+                        else:
+                            other_square.color = sColor.MOVEMENT2.value
 
         else:  # retorna a(s) casa(s) às cores originais
             actual_square.status = 0
             actual_square.color = actual_square.o_color
             self.revertBoardColor()
 
-    def revertBoardColor(self):
+    def revertBoardColor(self) -> None:
         for line in self.board:
             for square in line:
 
                 if square.color != square.o_color:
                     square.color = square.o_color
 
-    def pieceClick(self, x, y, gamestate):
+    def pieceClick(self, x: int, y: int, gamestate: Any) -> Union[tuple[int, int], int]:
         shift = gamestate.whiteToMove
 
         if shift:
@@ -189,22 +192,22 @@ class Board:
 
         return 0
 
-    def squareClick(self, x, y):
+    def squareClick(self, x: int, y: int) -> tuple[Optional[int], Optional[int]]:
         i = j = None
 
         for line in self.board:
             for square in line:
 
                 if square.returnPoint(x, y):
-                    i, j = square.returnCoordinates(x, y)
+                    i, j = square.returnCoordinates()
 
         if i is None and j is None:
-            return TypeError('No squares were clicked.')
+            raise TypeError('No squares were clicked.')
 
         else:
             return i, j
 
-    def isSameColor(self, i, j, old_i, old_j):
+    def isSameColor(self, i: int, j: int, old_i: int, old_j: int) -> Optional[bool]:
         new_square = self.board[i][j]
         old_square = self.board[old_i][old_j]
 
@@ -217,10 +220,10 @@ class Board:
         else:
             return False
 
-    def dragSquareSwitch(self, coord, gamestate):
+    def dragSquareSwitch(self, coord: Union[int, tuple[int, int]], gamestate: Any) -> None:
         clicked = gamestate.clicked
 
-        if type(coord) == type(clicked):
+        if type(coord) == type(clicked) and type(coord) == tuple:
             (i, j) = coord
             (other_i, other_j) = clicked
             self.squareColorChange(i, j, gamestate)
@@ -229,7 +232,7 @@ class Board:
                 self.squareColorChange(other_i, other_j, gamestate)
                 self.squareColorChange(i, j, gamestate)
 
-    def noColorClick(self, i, j, old_i, old_j, gamestate):
+    def noColorClick(self, i: int, j: int, old_i: int, old_j: int, gamestate: Any) -> int:
         new_square = self.board[i][j]
         old_square = self.board[old_i][old_j]
 
@@ -245,7 +248,9 @@ class Board:
         else:
             return 0
 
-    def samePieceClick(self, i, j, drag, gamestate):
+    def samePieceClick(self, i: int, j: int, drag: int, gamestate: Any) -> Any:
+        coord: Union[int, tuple[int, int]] = 0
+
         if drag == 0:
             coord = 0
 
@@ -255,7 +260,7 @@ class Board:
 
         return coord
 
-    def sameColorClick(self, i, j, old_i, old_j, drag, gamestate):
+    def sameColorClick(self, i: int, j: int, old_i: int, old_j: int, drag: int, gamestate: Any) -> Any:
         new_square = self.board[i][j]
         old_square = self.board[old_i][old_j]
 
@@ -271,7 +276,7 @@ class Board:
 
         return coord
 
-    def otherColorClick(self, i, j, old_i, old_j, gamestate):
+    def otherColorClick(self, i: int, j: int, old_i: int, old_j: int, gamestate: Any) -> int:
 
         new_square = self.board[i][j]
         old_square = self.board[old_i][old_j]

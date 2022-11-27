@@ -1,13 +1,14 @@
 from abc import ABC, abstractmethod
 from classes.Colors import Color
-import pyglet
-
+from typing import Any, Optional
+from random import choice
 
 class Piece(ABC):
-    
-    def __init__(self, image, id, i, j):
-        self.image = image # desenho da peça
-        self.id = id # id da peça
+    ID: str = ""
+
+    def __init__(self, image: Any, id: str, i: int, j: int) -> None:
+        self.image = image
+        self.id = id
         if self.id[0] == "w":
             self._color = Color.WHITE
         else:
@@ -15,23 +16,24 @@ class Piece(ABC):
         self.i = i
         self.j = j
 
-    def __eq__(self, other):
+    def __eq__(self, other: Optional[Any]) -> bool:
         if other is not None:
             return self.i == other.i and self.j == other.j
+        return False
 
     @property
-    def color(self):
+    def color(self) -> Any:
         return self._color
 
     @abstractmethod
-    def move(self, new_square, old_square):
+    def move(self, new_square: Any, movelist: list[tuple[int, int]]) -> Any:
         pass
 
     @abstractmethod
-    def moveList(self, board):
+    def moveList(self, board: Any) -> list[tuple[int, int]]:
         pass
     
-    def validMoves(self, gamestate, board):
+    def validMoves(self, gamestate: Any, board: Any) -> list[tuple[int, int]]:
         validMoves = self.moveList(board)
         matrix = board.board
 
@@ -62,9 +64,6 @@ class Piece(ABC):
             matrix[valid[0]][valid[1]].piece = matrix[self.i][self.j].piece
             matrix[self.i][self.j].piece = None
 
-            # if board.board[validMoves[i][0]][validMoves[i][1]].square.piece != None:
-
-
             if gamestate.inCheck(board):
                 validMoves.remove(valid)
 
@@ -85,11 +84,14 @@ class Piece(ABC):
 
         return validMoves
 
-    def returnPoint(self, x, y, width, height):  # retorna True se for clicado na casa
+    def captureList(self, board: Any, verifySquare: bool = False) -> list:
+        return []
+
+    def returnPoint(self, x: int, y: int, width: int, height: int) -> bool:  # retorna True se for clicado na casa
         return (self.i * width) <= y < (self.i + 1) * width \
                and (self.j * height) <= x < (self.j + 1) * height
 
-    def there_is_piece_between(self, i, j, matrix):
+    def there_is_piece_between(self, i: int, j: int, matrix: list[list[Any]]) -> int:
         if self.isInRange(i, j):
 
             if matrix[i][j].piece is None:
@@ -104,12 +106,12 @@ class Piece(ABC):
         else:
             return -1
 
-    # método de captura, não precisa verificar a cor, já implantado no move
-    def canCapture(self, new_square):
+    def canCapture(self, new_square: Any) -> bool:
         if self.move and new_square.piece is not None:
             return True
+        return False
 
-    def capture(self, new_square, board):
+    def capture(self, new_square: Any, board: Any) -> None:
         if new_square.returnPieceColor() == Color.WHITE:
             for piece in board.white_pieces:
                 if new_square.piece == piece:
@@ -121,24 +123,29 @@ class Piece(ABC):
                     board.black_pieces.remove(piece)
 
     # caso a peça esteja dentro dos parâmetros, para não usar try para tratar erros
-    def isInRange(self, i, j):
+    def isInRange(self, i: int, j: int) -> bool:
         if 0 <= i <= 7 and 0 <= j <= 7:
             return True
+        return False
+
 
 class Rook(Piece):
     ID = "R"
-    def __init__(self, image, id, i, j):
+
+    def __init__(self, image: Any, id: str, i: int, j: int) -> None:
         super().__init__(image, id, i, j)
         self.already_moved = False
 
-    def move(self, new_square, movelist):  # verifica se na lista de movimentos é possível mover a peça à casa desejada
-        for i in movelist:  # movelist = lista de tuplas, logo i = tupla
-            (i, j) = i
+    def move(self, new_square: Any, movelist: list[tuple[int, int]]) -> bool:
+        for movement in movelist:
+            (i, j) = movement
 
             if (i, j) == (new_square.i, new_square.j):
                 return True
 
-    def moveList(self, board):
+        return False
+
+    def moveList(self, board: Any) -> list[tuple[int, int]]:
         matrix = board.board
         movelist = []
         possible_move = [1, 1, 1, 1]  # [norte, leste, sul, oeste]
@@ -177,12 +184,12 @@ class Rook(Piece):
 
 
 class Knight(Piece):
-    
     ID = "N"
-    def __init__(self, image, id, i, j):
+
+    def __init__(self, image: Any, id: str, i: int, j: int) -> None:
         super().__init__(image, id, i, j)
     
-    def moveList(self, board):  # lista de movimentos
+    def moveList(self, board: Any) -> list[tuple[int, int]]:  # lista de movimentos
         matrix = board.board
         moveList = []
         possible_indexes = [1, -1, 2, -2]  # lista para iteração
@@ -200,12 +207,14 @@ class Knight(Piece):
         return moveList
 
     # verifica se na lista de movimentos é possível mover a peça à casa desejada
-    def move(self, new_square, movelist):
+    def move(self, new_square: Any, movelist: list[tuple[int, int]]) -> bool:
 
         for i in movelist:  # movelist = lista de tuplas, logo i = tupla
 
             if i == (new_square.i, new_square.j):
                 return True
+
+        return False
 
 
 class Bishop(Piece):
@@ -219,6 +228,8 @@ class Bishop(Piece):
 
             if (i, j) == (new_square.i, new_square.j):
                 return True
+
+        return False
 
     def moveList(self, board):
         matrix = board.board
@@ -262,28 +273,32 @@ class Bishop(Piece):
 
 class Queen(Piece):
     ID = "Q"
-    def __init__(self, image, id, i, j):
+    def __init__(self, image: Any, id: str, i: int, j: int) -> None:
         super().__init__(image, id, i, j)
 
-    def move(self, new_square, movelist):
-        for i in movelist:
-            (i, j) = i
+    def move(self, new_square: Any, movelist: list[tuple[int, int]]) -> bool:
+        for movement in movelist:
+            (i, j) = movement
             if (i, j) == (new_square.i, new_square.j):
                 return True
 
-    def moveList(self, board):
+        return False
+
+    def moveList(self, board: Any) -> list[tuple[int, int]]:
         movelist = []
-        movelist += Rook.moveList(self, board)
-        movelist += Bishop.moveList(self, board)
+        rook = Rook(None, self.color.value + Rook.ID, self.i, self.j)
+        movelist += rook.moveList(board)
+        bishop = Bishop(None, self.color.value + Rook.ID, self.i, self.j)
+        movelist += bishop.moveList(board)
         return movelist
 
 class King(Piece):
     ID = "K"
-    def __init__(self, image, id, i, j):
+    def __init__(self, image: Any, id: str, i: int, j: int) -> None:
         super().__init__(image, id, i, j)
         self.already_moved = False
 
-    def moveList(self, board):
+    def moveList(self, board: Any) -> list[tuple[int, int]]:
         matrix = board.board
         kingMoves = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
         movelist = []
@@ -291,7 +306,6 @@ class King(Piece):
         for i in range(8):
             i_final = self.i + kingMoves[i][0]
             j_final = self.j + kingMoves[i][1]
-        
 
             if self.there_is_piece_between(i_final, j_final, matrix) == -1:
                 pass
@@ -306,27 +320,28 @@ class King(Piece):
                 pass
         
         return movelist
-    
 
-    def verifyCastlePieces(self,board,gamestate,direction):
+    def verifyCastlePieces(self, board: Any, gamestate: Any, direction: str) -> bool:
 
         canCastle = True
 
         if direction == "right":
-            for col in range(5,7):
+            for col in range(5, 7):
                 
-                if self.there_is_piece_between(self.i,col,board.board) == 1 or self.there_is_piece_between(self.i,col,board.board) == 2 or gamestate.squareUnderAttack(self.i,col,board) :
+                if self.there_is_piece_between(self.i,col,board.board) == 1 or self.there_is_piece_between(self.i,col,board.board) == 2 or gamestate.squareUnderAttack(self.i,col,board):
                     canCastle = False
+                    
                 
         else:
 
-            for col in range(1,4):
+            for col in range(1, 4):
                 if self.there_is_piece_between(self.i,col,board.board) == 1 or self.there_is_piece_between(self.i,col,board.board) == 2 or gamestate.squareUnderAttack(self.i,col,board):
                     canCastle = False
+                    
         
         return canCastle
 
-    def validMoves(self, gamestate, board):
+    def validMoves(self, gamestate: Any, board: Any) -> list[tuple[int, int]]:
         castleMoves = []
         
         if self.color == Color.WHITE:
@@ -347,20 +362,22 @@ class King(Piece):
             
         return super().validMoves(gamestate,board) + castleMoves
 
-    def move(self, new_square, movelist):
-        for i in movelist:
-            (i, j) = i
+    def move(self, new_square: Any, movelist: list[tuple[int, int]]) -> bool:
+        for movement in movelist:
+            (i, j) = movement
             if (i, j) == (new_square.i, new_square.j):
                 return True
 
+        return False
 
 class Pawn(Piece):
     ID = "p"
-    def __init__(self, image, id, i, j):
+    def __init__(self, image: Any, id: str, i: int, j: int) -> None:
         super().__init__(image, id, i, j)
         self.already_moved = False
+        
 
-    def move(self, new_square, moveList):
+    def move(self, new_square: Any, moveList: list[tuple[int, int]]) -> bool:
         for move in moveList:
             if move == (new_square.i, new_square.j):
 
@@ -369,7 +386,9 @@ class Pawn(Piece):
 
                 return True
 
-    def moveList(self, board):
+        return False
+
+    def moveList(self, board: Any) -> list[tuple[int, int]]:
         rotation = board.board_rotation
         matrix = board.board
         moveList = []
@@ -412,7 +431,7 @@ class Pawn(Piece):
 
         return moveList
 
-    def captureList(self, board):
+    def captureList(self, board: Any, verifySquare = False) -> list[tuple[int, int]]:
         moveList = []
         matrix = board.board
         rotation = board.board_rotation
@@ -433,22 +452,25 @@ class Pawn(Piece):
             if self.there_is_piece_between(i_final, j_final, matrix) == 1:
                 moveList.append((i_final, j_final))
 
+            if verifySquare and self.there_is_piece_between(i_final, j_final, matrix) == 0:
+                moveList.append((i_final, j_final))
+
         return moveList
 
-    def checkPromotion(self, board):
-        
-        
+    def checkPromotion(self, board: Any) -> bool:
         if self.color == Color.WHITE:
             if board.board_rotation:
                 
                 if self.i == 0:
+
                     return True
                 else:
                     return False
             else:
 
                 if self.i == 7:
-                    return True
+
+                    return True 
                 else:
                     return False
         else:
@@ -456,25 +478,25 @@ class Pawn(Piece):
             if board.board_rotation:
 
                 if self.i == 7:
+                    
                     return True
                 else:
                     return False
             else:
                 if self.i == 0:
+
                     return True
                 else:
                     return False
 
-    def promotePawn(self,board):
+    def promotePawn(self, board: Any) -> None:
 
         if self.checkPromotion(board):
             
-            chosen = self.showPromotionMenu(board)
+            chosenPiece = choice([Bishop,Queen,Knight,Rook])
 
             if self.color == Color.WHITE:
-                
-                
-                pawnPromoted = board.addPiece(chosen ,Color.WHITE,self.i,self.j)
+                pawnPromoted = board.addPiece(chosenPiece ,Color.WHITE,self.i,self.j)
 
                 for piece in board.white_pieces:
                     if piece == self:
@@ -484,9 +506,7 @@ class Pawn(Piece):
                 board.board[self.i][self.j].piece = pawnPromoted
 
             else:
-                
-                pawnPromoted = board.addPiece(chosen, Color.BLACK,self.i,self.j)
-
+                pawnPromoted = board.addPiece(chosenPiece, Color.BLACK,self.i,self.j)
                 for piece in board.black_pieces:
                     if piece == self:
                         board.black_pieces.remove(piece)
@@ -494,56 +514,6 @@ class Pawn(Piece):
                 board.black_pieces.append(pawnPromoted)
                 board.board[self.i][self.j].piece = pawnPromoted
 
-    def showPromotionMenu(self,board):
-        ids =["B","N","Q","R"]
-        images = {}
-        chosen = None
-        i = 0
-        distance = 64
-        height = 64
-        window = pyglet.window.Window(width = distance*4, height = height)
-        if self.color == Color.WHITE and self.checkPromotion(board):
 
-            for id in ids:
-                piece = "w" + id
-                images[piece] = pyglet.image.load("public/" + piece + ".png")
-                
-                images[piece] = pyglet.sprite.Sprite(images[piece], x = i * distance, y = 0)
-
-                i += 1
-        elif self.color == Color.BLACK and self.checkPromotion(board):
-            for id in ids:
-                piece = "b" + id
-                images[piece] = pyglet.image.load("public/" + piece + ".png")
-
-                images[piece] = pyglet.sprite.Sprite(images[piece], x = i * distance, y = 0)
-
-                i += 1
-
-        @window.event
-        def on_draw():
-            window.clear()
-
-            for piece in images:
-                images[piece].draw()
-
-        @window.event
-        def on_mouse_release(x, y, buttons, modifiers):
-            if 0 <= x <= distance*1:
-                chosen = Bishop
-
-            elif distance*1 < x <= distance*2:
-                chosen = Knight
-            
-            elif distance*2 < x <= distance*3:
-                chosen = Queen
-            
-            else:
-                chosen = Rook
-
-            window.close()
-
-        return chosen
-            
-
+        
         

@@ -30,7 +30,8 @@ class EndGameMenu():
             self.sprite_bg = pyglet.sprite.Sprite(
                 self.background,
                 x=0,
-                y=0)
+                y=0
+            )
             self.text = 'Empate!'
             self.label = pyglet.text.Label(
                 self.text,
