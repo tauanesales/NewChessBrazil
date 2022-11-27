@@ -51,11 +51,12 @@ class GameState():
     def staleMate(self, other):
         self._staleMate = other
 
-    def shiftChange(self):  # mudança de turno
+    def shiftChange(self, board):  # mudança de turno
         if self.whiteToMove == True:
             self.whiteToMove = False
         else:
             self.whiteToMove = True
+        self.getAllValidMoves(board)
 
     def getAllEnemyPossibleMoves(self, board):
         moves = []
@@ -64,7 +65,7 @@ class GameState():
             for blackPiece in board.black_pieces:
 
                 if blackPiece.ID == "p":
-                    for move in blackPiece.captureList(board):
+                    for move in blackPiece.captureList(board, True):
                         moves.append(move)
                 else:
                     for move in blackPiece.moveList(board):
@@ -74,7 +75,7 @@ class GameState():
 
             for whitePiece in board.white_pieces:
                 if whitePiece.ID == "p":
-                    for move in whitePiece.captureList(board):
+                    for move in whitePiece.captureList(board, True):
                         moves.append(move)
 
                 else:
@@ -83,7 +84,7 @@ class GameState():
 
         return moves
     
-    def squareUnderAttack(self,square_i,square_j,board):
+    def squareUnderAttack(self, square_i, square_j, board):
         
         # Buscamos pelos movimentos inimigos que atacam o square desejado
         enemyMoves = self.getAllEnemyPossibleMoves(board)
@@ -105,26 +106,27 @@ class GameState():
         else:
             return self.squareUnderAttack(self.blackKingPosition[0],self.blackKingPosition[1],board)
 
-    def getAllEnemyValidMoves(self, board):
+    def getAllValidMoves(self, board):
         """
-            retorna todos os movimentos válidos do jogador oponente
+            retorna todos os movimentos válidos do jogador da vez
             OBS: se len(allValidMoves) == 0 temos um xequemate ou stalemate
         """
         allValidMoves = []
 
         if self.whiteToMove:
 
-            for black_piece in board.black_pieces:
-                allValidMoves.append(black_piece.validMoves(self,board))
+            for white_piece in board.white_pieces:
+                allValidMoves += white_piece.validMoves(self, board)
 
         else:
-            for white_piece in board.white_pieces:
-                allValidMoves.append(white_piece.validMoves(self,board))
+            for black_piece in board.black_pieces:
+                allValidMoves += black_piece.validMoves(self, board)
 
         if len(allValidMoves) == 0:
 
             if self.inCheck(board):
                 self.checkMate = True
+
             else:
                 self.staleMate = True
         else:

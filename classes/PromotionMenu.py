@@ -48,7 +48,12 @@ class PromotionMenu(pyglet.window.Window):
 
         self.close()
 
-    def on_close(self):
+    # def on_close(self):
+    #     return self.chosen
+
+    def on_window_close(self):
+        event_loop = pyglet.app.EventLoop()
+        event_loop.exit()
+        
         return self.chosen
-
-
+        

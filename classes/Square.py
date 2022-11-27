@@ -1,8 +1,14 @@
+import pyglet.shapes
 from pyglet import graphics
-from classes.Colors import Color
+from classes.Colors import sColor, Color
+from typing import Optional, Any, Callable, Union
+from classes.Piece import Rook, Knight, Bishop, Queen, King, Pawn
+from ChessEngine import GameState
+
 
 class Square:
-    def __init__(self, square, i, j, width, height, piece=None):
+    def __init__(self, square: pyglet.shapes.Rectangle, i: int, j: int, width: int, height: int,
+                 piece: Union[Rook, Knight, Bishop, Queen, King, Pawn] = None) -> None:
         self.square = square
         self.i = i
         self.j = j
@@ -13,103 +19,120 @@ class Square:
         self.o_color = self.square.color
 
     @property
-    def color(self):
+    def color(self) -> sColor:
         return self.square.color
 
     @color.setter
-    def color(self, other):
+    def color(self, other: sColor) -> None:
         self.square.color = other
 
-    def returnPoint(self, x, y):  # retorna True se for clicado na casa
+    def returnPiece(self) -> Optional[Union[Rook, Knight, Bishop, Queen, King, Pawn, Exception]]:
+        if self.piece is None:
+            raise Exception('There are no pieces in this square.')
+        return self.piece
+
+    def returnPoint(self, x: int, y: int) -> bool:
         return (self.i * self.width) <= y < (self.i + 1) * self.width \
                and (self.j * self.height) <= x < (self.j + 1) * self.height
 
-    def returnCoordinates(self, x, y):  # retorna as coordenadas da "matriz"
+    def returnCoordinates(self) -> tuple[int, int]:
         return self.i, self.j
 
-    def returnPieceColor(self):  # retorna a cor da peça
+    def returnPieceColor(self) -> Optional[Color]:
         if self.piece is not None:
             return self.piece.color
+        return None
 
-    def drawPiece(self):  # desenhar a peça na janela
+    def drawPiece(self) -> Optional[Callable[[Any], Any]]:
         if self.piece is not None:
             return self.piece.image.draw()
+        return None
 
-    def pieceMoveList(self, gamestate, board):  # retorna a lista de movimentos possíveis da peça (lista de tuplas)
-        return self.piece.validMoves(gamestate, board)
+    def pieceMoveList(self, gamestate: GameState, board: Any) -> Optional[list[tuple[int, int]]]:
+        if self.piece is not None:
+            return self.piece.validMoves(gamestate, board)
 
-    def analyseMove(self, new_square, gamestate, board):  # verificar se é possível mover através da lista
-        movelist = self.pieceMoveList(gamestate, board)
-        return self.piece.move(new_square, movelist)
+        return None
 
-    def changeImageCoord(self, xf = None, yf = None):  # mudar coords da imagem
-        if xf is None and yf is None:
-            self.piece.image.x = self.j * self.width
-            self.piece.image.y = self.i * self.height
-        else:
-            self.piece.image.x = xf
-            self.piece.image.y = yf
-            self.piece.image.group = graphics.OrderedGroup(1)
+    def analyseMove(self, new_square: Any, gamestate: GameState, board: Any) -> Optional[bool]:
+        if self.piece is not None:
+            movelist = self.pieceMoveList(gamestate, board)
 
-    def analyseCapture(self, new_square):  # verificar captura (útil quando implantar xeques)
-        return self.piece.canCapture(new_square)
+            if movelist is not None:
+                return self.piece.move(new_square, movelist)
+        return None
+
+    def changeImageCoord(self, xf: Optional[int] = None, yf: Optional[int] = None) -> None:  # mudar coords da imagem
+        if self.piece is not None:
+            if xf is None and yf is None:
+                self.piece.image.x = self.j * self.width
+                self.piece.image.y = self.i * self.height
+            else:
+                self.piece.image.x = xf
+                self.piece.image.y = yf
+                self.piece.image.group = graphics.OrderedGroup(1)
+        return None
+
+    def analyseCapture(self, new_square: Any) -> Optional[bool]:
+        if self.piece is not None:
+            return self.piece.canCapture(new_square)
+        return None
     
-    def updateCastlingRights(self,gamestate):
-        
-        if self.piece.ID == "K" and self.piece.color == Color.WHITE:
-
-            gamestate.currentCastlingRight.whiteKingSide = False
-            gamestate.currentCastlingRight.whiteQueenSide = False
-
-        if self.piece.ID == "K" and self.piece.color == Color.BLACK:
-            gamestate.currentCastlingRight.blackKingSide = False
-            gamestate.currentCastlingRight.blackQueenSide = False
-
-
-        if self.piece.ID == "R" and self.piece.color == Color.WHITE and self.j == gamestate.whiteKingPosition[1] - 4:
-            gamestate.currentCastlingRight.whiteQueenSide = False
-
-        if self.piece.ID == "R" and self.piece.color == Color.WHITE and self.j == gamestate.whiteKingPosition[1] + 3:
-            gamestate.currentCastlingRight.whiteKingSide = False
-
-        if self.piece.ID == "R" and self.piece.color == Color.BLACK and self.j == gamestate.blackKingPosition[1] - 4:
-            gamestate.currentCastlingRight.blackQueenSide = False
-
-        if self.piece.ID == "R" and self.piece.color == Color.BLACK and self.j == gamestate.blackKingPosition[1] + 3:
-            gamestate.currentCastlingRight.blackKingSide = False
-
-    
-    def movePiece(self, new_square, board, gamestate):  # mover a peça de casa, vincula-a a nova e desvincula da atual
-        
-        if self.piece.ID == "K" and new_square.j - self.piece.j  == 2:
-            gamestate.getKingSideCastleMoves(board)
-
-        elif self.piece.ID == "K" and self.piece.j - new_square.j  == 2:
-            gamestate.getQueenSideCastleMoves(board)
-        else:
-        
-            self.piece.i = new_square.i
-            self.piece.j = new_square.j
-        
+    def updateCastlingRights(self, gamestate: GameState) -> None:
+        if self.piece is not None:
             if self.piece.ID == "K" and self.piece.color == Color.WHITE:
-                gamestate.whiteKingPosition = (new_square.i,new_square.j)
-        
+
+                gamestate.currentCastlingRight.whiteKingSide = False
+                gamestate.currentCastlingRight.whiteQueenSide = False
 
             if self.piece.ID == "K" and self.piece.color == Color.BLACK:
-                gamestate.blackKingPosition = (new_square.i,new_square.j)
+                gamestate.currentCastlingRight.blackKingSide = False
+                gamestate.currentCastlingRight.blackQueenSide = False
 
-            self.updateCastlingRights(gamestate)
+            if self.piece.ID == "R" and self.piece.color == Color.WHITE and self.j == gamestate.whiteKingPosition[1] - 4:
+                gamestate.currentCastlingRight.whiteQueenSide = False
 
-            new_square.piece = self.piece
-            self.piece = None
-            new_square.changeImageCoord()
-            new_square.piece.validMoves(gamestate,board)
+            if self.piece.ID == "R" and self.piece.color == Color.WHITE and self.j == gamestate.whiteKingPosition[1] + 3:
+                gamestate.currentCastlingRight.whiteKingSide = False
 
-            if new_square.piece.ID == "p":
-                new_square.piece.promotePawn(board)
+            if self.piece.ID == "R" and self.piece.color == Color.BLACK and self.j == gamestate.blackKingPosition[1] - 4:
+                gamestate.currentCastlingRight.blackQueenSide = False
 
-        gamestate.getAllEnemyValidMoves(board)
-        print(gamestate.checkMate)
+            if self.piece.ID == "R" and self.piece.color == Color.BLACK and self.j == gamestate.blackKingPosition[1] + 3:
+                gamestate.currentCastlingRight.blackKingSide = False
 
-    def capturePiece(self, new_square, board):
-        return self.piece.capture(new_square, board)
+        return None
+
+    def movePiece(self, new_square: Any, board: Any, gamestate: GameState) -> None:
+        if self.piece is not None:
+            if self.piece.ID == "K" and new_square.j - self.piece.j == 2:
+                gamestate.getKingSideCastleMoves(board)
+
+            elif self.piece.ID == "K" and self.piece.j - new_square.j == 2:
+                gamestate.getQueenSideCastleMoves(board)
+            else:
+
+                self.piece.i = new_square.i
+                self.piece.j = new_square.j
+
+                if self.piece.ID == "K" and self.piece.color == Color.WHITE:
+                    gamestate.whiteKingPosition = (new_square.i,new_square.j)
+
+                elif self.piece.ID == "K" and self.piece.color == Color.BLACK:
+                    gamestate.blackKingPosition = (new_square.i,new_square.j)
+
+                self.updateCastlingRights(gamestate)
+
+                new_square.piece = self.piece
+                self.piece = None
+                new_square.changeImageCoord()
+                new_square.piece.validMoves(gamestate,board)
+
+                if new_square.piece.ID == "p":
+                    new_square.piece.promotePawn(board)
+        return None
+
+    def capturePiece(self, new_square: Any, board: Any) -> Optional[Callable[[Any, Any], None]]:
+        if self.piece is not None:
+            return self.piece.capture(new_square, board)
+        return None

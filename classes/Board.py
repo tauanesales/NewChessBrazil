@@ -196,7 +196,7 @@ class Board:
             for square in line:
 
                 if square.returnPoint(x, y):
-                    i, j = square.returnCoordinates(x, y)
+                    i, j = square.returnCoordinates()
 
         if i is None and j is None:
             return TypeError('No squares were clicked.')
