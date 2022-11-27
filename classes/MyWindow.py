@@ -30,8 +30,6 @@ class MyWindow(pyglet.window.Window):
         elif self.window == "start":
             self.startMenu.on_draw()
 
-    
-
     def on_draw_game_menu(self):
         if self.running:
             

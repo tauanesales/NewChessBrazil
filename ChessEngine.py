@@ -65,7 +65,7 @@ class GameState():
             for blackPiece in board.black_pieces:
 
                 if blackPiece.ID == "p":
-                    for move in blackPiece.captureList(board):
+                    for move in blackPiece.captureList(board, True):
                         moves.append(move)
                 else:
                     for move in blackPiece.moveList(board):
@@ -75,7 +75,7 @@ class GameState():
 
             for whitePiece in board.white_pieces:
                 if whitePiece.ID == "p":
-                    for move in whitePiece.captureList(board):
+                    for move in whitePiece.captureList(board, True):
                         moves.append(move)
 
                 else:
@@ -84,7 +84,7 @@ class GameState():
 
         return moves
     
-    def squareUnderAttack(self,square_i,square_j,board):
+    def squareUnderAttack(self, square_i, square_j, board):
         
         # Buscamos pelos movimentos inimigos que atacam o square desejado
         enemyMoves = self.getAllEnemyPossibleMoves(board)

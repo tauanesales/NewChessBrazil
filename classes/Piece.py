@@ -324,14 +324,16 @@ class King(Piece):
         if direction == "right":
             for col in range(5,7):
                 
-                if self.there_is_piece_between(self.i,col,board.board) == 1 or self.there_is_piece_between(self.i,col,board.board) == 2 or gamestate.squareUnderAttack(self.i,col,board) :
+                if self.there_is_piece_between(self.i,col,board.board) == 1 or self.there_is_piece_between(self.i,col,board.board) == 2 or gamestate.squareUnderAttack(self.i,col,board):
                     canCastle = False
+                    print(gamestate.squareUnderAttack(self.i,col,board))
                 
         else:
 
             for col in range(1,4):
                 if self.there_is_piece_between(self.i,col,board.board) == 1 or self.there_is_piece_between(self.i,col,board.board) == 2 or gamestate.squareUnderAttack(self.i,col,board):
                     canCastle = False
+                    print(gamestate.squareUnderAttack(self.i, col, board))
         
         return canCastle
 
@@ -424,7 +426,7 @@ class Pawn(Piece):
 
         return moveList
 
-    def captureList(self, board):
+    def captureList(self, board, verifySquare = False):
         moveList = []
         matrix = board.board
         rotation = board.board_rotation
@@ -445,11 +447,12 @@ class Pawn(Piece):
             if self.there_is_piece_between(i_final, j_final, matrix) == 1:
                 moveList.append((i_final, j_final))
 
+            if verifySquare and self.there_is_piece_between(i_final, j_final, matrix) == 0:
+                moveList.append((i_final, j_final))
+
         return moveList
 
     def checkPromotion(self, board):
-        
-        
         if self.color == Color.WHITE:
             if board.board_rotation:
                 
@@ -481,11 +484,9 @@ class Pawn(Piece):
 
         if self.checkPromotion(board):
             
-            chosen = self.showPromotionMenu(board)
+            chosen = self.showPromotionMenu()
 
             if self.color == Color.WHITE:
-                
-                
                 pawnPromoted = board.addPiece(chosen ,Color.WHITE,self.i,self.j)
 
                 for piece in board.white_pieces:
@@ -496,9 +497,7 @@ class Pawn(Piece):
                 board.board[self.i][self.j].piece = pawnPromoted
 
             else:
-                
                 pawnPromoted = board.addPiece(chosen, Color.BLACK,self.i,self.j)
-
                 for piece in board.black_pieces:
                     if piece == self:
                         board.black_pieces.remove(piece)
@@ -506,7 +505,7 @@ class Pawn(Piece):
                 board.black_pieces.append(pawnPromoted)
                 board.board[self.i][self.j].piece = pawnPromoted
 
-    def showPromotionMenu(self,board):
+    def showPromotionMenu(self):
         promotionMenu = PromotionMenu(self.color)
         pieces = [Bishop, Knight, Queen, Rook]
         chosen = promotionMenu.on_close()
