@@ -1,9 +1,8 @@
 import pyglet.shapes
 from pyglet import graphics
-from classes.Colors import sColor, Color
+from classes.Colors import Color
 from typing import Optional, Any, Callable, Union
 from classes.Piece import Rook, Knight, Bishop, Queen, King, Pawn
-from ChessEngine import GameState
 
 
 class Square:
@@ -19,11 +18,11 @@ class Square:
         self.o_color = self.square.color
 
     @property
-    def color(self) -> sColor:
+    def color(self) -> tuple[int, int, int]:
         return self.square.color
 
     @color.setter
-    def color(self, other: sColor) -> None:
+    def color(self, other: tuple[int, int, int]) -> None:
         self.square.color = other
 
     def returnPiece(self) -> Optional[Union[Rook, Knight, Bishop, Queen, King, Pawn, Exception]]:
@@ -48,13 +47,12 @@ class Square:
             return self.piece.image.draw()
         return None
 
-    def pieceMoveList(self, gamestate: GameState, board: Any) -> Optional[list[tuple[int, int]]]:
+    def pieceMoveList(self, gamestate: Any, board: Any) -> Optional[list[tuple[int, int]]]:
         if self.piece is not None:
             return self.piece.validMoves(gamestate, board)
-
         return None
 
-    def analyseMove(self, new_square: Any, gamestate: GameState, board: Any) -> Optional[bool]:
+    def analyseMove(self, new_square: Any, gamestate: Any, board: Any) -> Optional[bool]:
         if self.piece is not None:
             movelist = self.pieceMoveList(gamestate, board)
 
@@ -71,14 +69,13 @@ class Square:
                 self.piece.image.x = xf
                 self.piece.image.y = yf
                 self.piece.image.group = graphics.OrderedGroup(1)
-        return None
 
     def analyseCapture(self, new_square: Any) -> Optional[bool]:
         if self.piece is not None:
             return self.piece.canCapture(new_square)
         return None
     
-    def updateCastlingRights(self, gamestate: GameState) -> None:
+    def updateCastlingRights(self, gamestate: Any) -> None:
         if self.piece is not None:
             if self.piece.ID == "K" and self.piece.color == Color.WHITE:
 
@@ -101,9 +98,7 @@ class Square:
             if self.piece.ID == "R" and self.piece.color == Color.BLACK and self.j == gamestate.blackKingPosition[1] + 3:
                 gamestate.currentCastlingRight.blackKingSide = False
 
-        return None
-
-    def movePiece(self, new_square: Any, board: Any, gamestate: GameState) -> None:
+    def movePiece(self, new_square: Any, board: Any, gamestate: Any) -> None:
         if self.piece is not None:
             if self.piece.ID == "K" and new_square.j - self.piece.j == 2:
                 gamestate.getKingSideCastleMoves(board)
@@ -130,7 +125,6 @@ class Square:
 
                 if new_square.piece.ID == "p":
                     new_square.piece.promotePawn(board)
-        return None
 
     def capturePiece(self, new_square: Any, board: Any) -> Optional[Callable[[Any, Any], None]]:
         if self.piece is not None:

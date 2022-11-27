@@ -3,17 +3,13 @@ import ChessEngine
 from classes.MyWindow import MyWindow
 from classes.Board import Board
 
-def main():
+
+def main() -> None:
     width = height = 512
-
     board = Board(width, height)
-
-    gs = ChessEngine.GameState(board.board_rotation)  # adicionando o gamestate ao jogo
-
-    running = True  # "rodar" o jogo
-
-    window = MyWindow(width, height, board, running, gs)  # criação da janela
-
+    gs = ChessEngine.GameState(board.board_rotation)
+    running = True
+    window = MyWindow(width, height, board, running, gs)
     pyglet.app.run()
 
 
