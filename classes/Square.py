@@ -124,7 +124,7 @@ class Square:
                 new_square.piece.validMoves(gamestate,board)
 
                 if new_square.piece.ID == "p":
-                    new_square.piece.promotePawn(board,gamestate)
+                    new_square.piece.promotePawn(board)
 
     def capturePiece(self, new_square: Any, board: Any) -> Optional[Callable[[Any, Any], None]]:
         if self.piece is not None:

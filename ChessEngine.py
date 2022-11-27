@@ -20,8 +20,7 @@ class GameState():
             self.blackKingPosition = (7, 4)
 
         self.currentCastlingRight = CastlingRights(True,True,True,True)
-        self.promotedPawn = False
-        self.promotedPawnObj = None
+
     @property
     def whiteToMove(self) -> bool:
         return self._whiteToMove
@@ -60,7 +59,7 @@ class GameState():
         else:
             self.whiteToMove = True
         self.getAllValidMoves(board)
-        self.promotedPawn = False
+    
         
     def getAllEnemyPossibleMoves(self, board: Board) -> list[tuple[int, int]]:
         moves = []

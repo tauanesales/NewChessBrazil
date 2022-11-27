@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 from classes.Colors import Color
-# from classes.PromotionMenu import PromotionMenu
 from typing import Any, Optional
-
+from random import choice
 
 class Piece(ABC):
     ID: str = ""
@@ -376,7 +375,7 @@ class Pawn(Piece):
     def __init__(self, image: Any, id: str, i: int, j: int) -> None:
         super().__init__(image, id, i, j)
         self.already_moved = False
-        self.chosenPromotedPiece = None
+        
 
     def move(self, new_square: Any, moveList: list[tuple[int, int]]) -> bool:
         for move in moveList:
@@ -458,7 +457,7 @@ class Pawn(Piece):
 
         return moveList
 
-    def checkPromotion(self, board: Any,gamestate: Any) -> bool:
+    def checkPromotion(self, board: Any) -> bool:
         if self.color == Color.WHITE:
             if board.board_rotation:
                 
@@ -490,14 +489,14 @@ class Pawn(Piece):
                 else:
                     return False
 
-    def promotePawn(self, board: Any,gamestate: Any) -> None:
+    def promotePawn(self, board: Any) -> None:
 
-        if self.checkPromotion(board,gamestate):
+        if self.checkPromotion(board):
             
-            
+            chosenPiece = choice([Bishop,Queen,Knight,Rook])
 
             if self.color == Color.WHITE:
-                pawnPromoted = board.addPiece(self.chosenPromotedPiece ,Color.WHITE,self.i,self.j)
+                pawnPromoted = board.addPiece(chosenPiece ,Color.WHITE,self.i,self.j)
 
                 for piece in board.white_pieces:
                     if piece == self:
@@ -507,7 +506,7 @@ class Pawn(Piece):
                 board.board[self.i][self.j].piece = pawnPromoted
 
             else:
-                pawnPromoted = board.addPiece(self.chosenPromotedPiece, Color.BLACK,self.i,self.j)
+                pawnPromoted = board.addPiece(chosenPiece, Color.BLACK,self.i,self.j)
                 for piece in board.black_pieces:
                     if piece == self:
                         board.black_pieces.remove(piece)

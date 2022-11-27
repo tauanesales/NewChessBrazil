@@ -3,7 +3,7 @@ from StartMenu import StartMenu
 from classes.Square import Square
 from typing import Any
 from CheckMateMenu import CheckMateMenu
-from classes.PromotionMenu import PromotionMenu
+
 
 class MyWindow(pyglet.window.Window):
 
@@ -21,7 +21,7 @@ class MyWindow(pyglet.window.Window):
         self.window = window
         self.startMenu = StartMenu(width, height, "New Chess Brazil")
         self.checkmateMenu = CheckMateMenu(width,height)
-        self.promotionMenu = PromotionMenu(self.gs)
+
 
 
     def boardSquare(self, i: int, j: int) -> Square:
@@ -35,10 +35,6 @@ class MyWindow(pyglet.window.Window):
         if self.gs.checkMate:
             self.checkmateMenu.on_draw()
         
-        elif self.gs.promotedPawn:
-            
-            self.promotionMenu.on_draw()
-
         else:
             if self.window == "game":
                 self.on_draw_game_menu()
@@ -90,8 +86,6 @@ class MyWindow(pyglet.window.Window):
         elif self.window == "start":
             self.window = self.startMenu.on_mouse_release(x, y, button, modifiers)
         
-        elif self.gs.promotedPawn:
-            self.window = self.promotionMenu.on_mouse_release(x,y,button,modifiers)
 
     def on_mouse_release_game_window(self, x: int, y: int, button: Any, modifiers: Any) -> None:
         if pyglet.window.mouse.LEFT:
