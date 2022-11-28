@@ -119,8 +119,8 @@ class Board:
 
         else:
             i = 7
-            king_pos = 3
-            queen_pos = 4
+            king_pos = 4
+            queen_pos = 3
 
         rook_b1 = self.addPiece(Rook, Color.BLACK, i, 0)
         rook_b2 = self.addPiece(Rook, Color.BLACK, i, 7)
