@@ -122,9 +122,11 @@ class Square:
                 self.piece = None
                 new_square.changeImageCoord()
                 new_square.piece.validMoves(gamestate,board)
+                self.verifyPawnPromotion(new_square, board)
 
-                if new_square.piece.ID == "p":
-                    new_square.piece.promotePawn(board)
+    def verifyPawnPromotion(self, new_square: Any, board: Any) -> None:
+        if new_square.piece.ID == "p":
+            new_square.piece.promotePawn(board)
 
     def capturePiece(self, new_square: Any, board: Any) -> Optional[Callable[[Any, Any], None]]:
         if self.piece is not None:
