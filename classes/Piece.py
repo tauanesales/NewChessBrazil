@@ -322,11 +322,18 @@ class King(Piece):
         return movelist
 
     def verifyCastlePieces(self, board: Any, gamestate: Any, direction: str) -> bool:
+        rotation = board.board_rotation
+        if rotation:
+            interval_left = range(1, 3)
+            interval_right = range(4, 7)
+        else:
+            interval_left = range(1, 4)
+            interval_right = range(5, 7)
 
         canCastle = True
 
         if direction == "right":
-            for col in range(5, 7):
+            for col in interval_right:
                 
                 if self.there_is_piece_between(self.i,col,board.board) == 1 or self.there_is_piece_between(self.i,col,board.board) == 2 or gamestate.squareUnderAttack(self.i,col,board):
                     canCastle = False
@@ -334,7 +341,7 @@ class King(Piece):
                 
         else:
 
-            for col in range(1, 4):
+            for col in interval_left:
                 if self.there_is_piece_between(self.i,col,board.board) == 1 or self.there_is_piece_between(self.i,col,board.board) == 2 or gamestate.squareUnderAttack(self.i,col,board):
                     canCastle = False
                     
@@ -347,7 +354,7 @@ class King(Piece):
         if self.color == Color.WHITE:
 
             if gamestate.currentCastlingRight.whiteKingSide and self.verifyCastlePieces(board,gamestate,direction="right"):
-                castleMoves += [(self.i,2 + self.j)]
+                castleMoves += [(self.i, 2 + self.j)]
                 
             if gamestate.currentCastlingRight.whiteQueenSide and self.verifyCastlePieces(board,gamestate,direction="left"):
                 castleMoves += [(self.i, self.j - 2)]

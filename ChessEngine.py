@@ -146,6 +146,12 @@ class GameState():
         """"
             Realiza o movimento do rei e da torre no roque a direita
         """
+        rotation = board.board_rotation
+        if rotation:
+            r_coord = 4
+
+        else:
+            r_coord = 5
 
         if self.whiteToMove:
 
@@ -167,10 +173,10 @@ class GameState():
                     self.whiteKingPosition = (row,col2)
 
                     # Movimento da torre no roque
-                    rookCastled = board.addPiece(Rook,Color.WHITE,row, 5)
+                    rookCastled = board.addPiece(Rook,Color.WHITE,row, r_coord)
                     board.white_pieces.remove(whiteRightRook)
                     board.white_pieces.append(rookCastled)
-                    board.board[row][5].piece = rookCastled
+                    board.board[row][r_coord].piece = rookCastled
                     board.board[row][7].piece = None
 
                     self.currentCastlingRight.whiteKingSide = False
@@ -195,10 +201,10 @@ class GameState():
                     self.blackKingPosition = (row,col2)
 
                     # Movimento da torre no roque
-                    rookCastled = board.addPiece(Rook,Color.BLACK,row, 5)
+                    rookCastled = board.addPiece(Rook,Color.BLACK,row, r_coord)
                     board.black_pieces.remove(blackRightRook)
                     board.black_pieces.append(rookCastled)
-                    board.board[row][5].piece = rookCastled
+                    board.board[row][r_coord].piece = rookCastled
                     board.board[row][7].piece = None
 
                     self.currentCastlingRight.blackKingSide = False
@@ -209,6 +215,12 @@ class GameState():
         """"
             Realiza o movimento do rei e da torre no roque a esquerda
         """
+
+        rotation = board.board_rotation
+        if rotation:
+            l_coord = 2
+        else:
+            l_coord = 3
 
         if self.whiteToMove:
 
@@ -231,10 +243,10 @@ class GameState():
                     self.whiteKingPosition = (row,col2)
 
                     # Movimento da torre no roque
-                    rookCastled = board.addPiece(Rook,Color.WHITE,row, 3)
+                    rookCastled = board.addPiece(Rook,Color.WHITE,row, l_coord)
                     board.white_pieces.remove(whiteLeftRook)
                     board.white_pieces.append(rookCastled)
-                    board.board[row][3].piece = rookCastled
+                    board.board[row][l_coord].piece = rookCastled
                     board.board[row][0].piece = None
 
                     self.currentCastlingRight.whiteKingSide = False
@@ -259,10 +271,10 @@ class GameState():
                     self.blackKingPosition = (row,col2)
 
                     # Movimento da torre no roque
-                    rookCastled = board.addPiece(Rook,Color.BLACK,row, 3)
+                    rookCastled = board.addPiece(Rook,Color.BLACK,row, l_coord)
                     board.black_pieces.remove(blackLeftRook)
                     board.black_pieces.append(rookCastled)
-                    board.board[row][3].piece = rookCastled
+                    board.board[row][l_coord].piece = rookCastled
                     board.board[row][0].piece = None
 
                     self.currentCastlingRight.blackKingSide = False
