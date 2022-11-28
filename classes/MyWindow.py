@@ -3,14 +3,14 @@ from StartMenu import StartMenu
 from EndGameMenu import EndGameMenu
 from classes.Square import Square
 from typing import Any
-
+from classes.Board import Board
+from ChessEngine import GameState
 
 class MyWindow(pyglet.window.Window):
 
-    def __init__(self, width: int, height: int, board, running: bool, gamestate, window: str = "start") -> None:
+    def __init__(self, width: int, height: int, board, gamestate, window: str = "start") -> None:
         super().__init__(width, height, caption="Chess")
         self.board = board
-        self.running = running
         self.gs = gamestate
         self.batch = self.board.batch
         self.drag = 0
@@ -20,7 +20,7 @@ class MyWindow(pyglet.window.Window):
         self.delta_y = 0
         self.window = window
         self.startMenu = StartMenu(width, height, "New Chess Brazil")
-        self.endGameMenu = EndGameMenu(width, height, is_checkmate=True)
+        self.endGameMenu = EndGameMenu(width, height,is_draw = False,is_checkMate = False)
 
     def boardSquare(self, i: int, j: int) -> Square:
         return self.board.board[i][j]
@@ -36,15 +36,19 @@ class MyWindow(pyglet.window.Window):
             self.startMenu.on_draw()
         elif self.window == "end-game":
             self.endGameMenu.on_draw()
+        elif self.window == "restart":
+            self.createNewBoard()
+            self.window = "game"
+            self.on_draw_game_menu()
 
     def on_draw_game_menu(self):
-        if self.running:
+        
 
-            self.batch.draw()  # desenhar batches devido ao alto número de shapes
+        self.batch.draw()  # desenhar batches devido ao alto número de shapes
 
-            for line in self.board.board:  # desenhar as peças normalmente
-                for square in line:
-                    square.drawPiece()
+        for line in self.board.board:  # desenhar as peças normalmente
+            for square in line:
+                square.drawPiece()
 
     def on_mouse_press(self, x: int, y: int, button: Any, modifiers: Any) -> None:
         if self.window == "game":
@@ -86,7 +90,9 @@ class MyWindow(pyglet.window.Window):
                 x, y, button, modifiers)
         elif self.window == "end-game":
             self.window = self.endGameMenu.on_mouse_release(x, y)
-
+        
+    
+        
     def on_mouse_release_game_window(self, x: int, y: int, button: Any, modifiers: Any) -> None:
         if pyglet.window.mouse.LEFT:
             if self.drag == 0 and type(self.gs.clicked) == int:
@@ -124,4 +130,20 @@ class MyWindow(pyglet.window.Window):
                 self.drag = 0
 
             if self.gs.checkMate:
-                self.running = False
+                self.window = "end-game"
+                self.endGameMenu.checkmate = True
+            
+            elif self.gs.staleMate:
+                self.window = "end-game"
+                self.endGameMenu.draw = True
+        
+
+    def createNewBoard(self):
+        self.board = Board(self.width,self.height)
+        self.gs = GameState(self.board.board_rotation)
+        self.batch = self.board.batch
+        
+    def on_mouse_motion(self,x,y,dx,dy):
+
+        if self.window == "quit":
+            self.close()
