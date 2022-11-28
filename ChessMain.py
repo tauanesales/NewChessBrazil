@@ -8,8 +8,8 @@ def main() -> None:
     width = height = 512
     board = Board(width, height)
     gs = ChessEngine.GameState(board.board_rotation)
-    running = True
-    window = MyWindow(width, height, board, running, gs)
+    
+    window = MyWindow(width, height, board, gs)
     pyglet.app.run()
 
 
