@@ -68,8 +68,12 @@ class Board:
 
         if self.board_rotation:
             i = 7
+            king_pos = 3
+            queen_pos = 4
         else:
             i = 0
+            king_pos = 4
+            queen_pos = 3
 
         rook_w1 = self.addPiece(Rook, Color.WHITE, i, 0)
         rook_w2 = self.addPiece(Rook, Color.WHITE, i, 7)
@@ -80,9 +84,9 @@ class Board:
         bishop_w1 = self.addPiece(Bishop, Color.WHITE, i, 2)
         bishop_w2 = self.addPiece(Bishop, Color.WHITE, i, 5)
 
-        queen_w = self.addPiece(Queen, Color.WHITE, i, 3)
+        queen_w = self.addPiece(Queen, Color.WHITE, i, queen_pos)
 
-        king_w = self.addPiece(King, Color.WHITE, i, 4)
+        king_w = self.addPiece(King, Color.WHITE, i, king_pos)
 
         column = [rook_w1, knight_w1, bishop_w1, queen_w, king_w, bishop_w2, knight_w2, rook_w2]
         self.white_pieces += column
@@ -110,9 +114,13 @@ class Board:
 
         if self.board_rotation:
             i = 0
+            king_pos = 3
+            queen_pos = 4
 
         else:
             i = 7
+            king_pos = 3
+            queen_pos = 4
 
         rook_b1 = self.addPiece(Rook, Color.BLACK, i, 0)
         rook_b2 = self.addPiece(Rook, Color.BLACK, i, 7)
@@ -124,9 +132,9 @@ class Board:
         bishop_b1 = self.addPiece(Bishop, Color.BLACK, i, 2)
         bishop_b2 = self.addPiece(Bishop, Color.BLACK, i, 5)
 
-        queen_b = self.addPiece(Queen, Color.BLACK, i, 3)
+        queen_b = self.addPiece(Queen, Color.BLACK, i, queen_pos)
 
-        king_b = self.addPiece(King, Color.BLACK, i, 4)
+        king_b = self.addPiece(King, Color.BLACK, i, king_pos)
 
         column = [rook_b1, knight_b1, bishop_b1, queen_b, king_b, bishop_b2, knight_b2, rook_b2]
         self.black_pieces += column
